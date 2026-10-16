@@ -1,6 +1,6 @@
 # SLYBYTE SHOP — Nền Tảng Thương Mại Điện Tử Thiết Bị Công Nghệ
 
-> **SlyByte Shop (Slybyte)** là nền tảng thương mại điện tử chuyên sâu về thiết bị công nghệ chính hãng cao cấp (Laptop cao cấp, Ultrabook, Gaming Pro, Smartphone Flagship, Phụ kiện & Thiết bị âm thanh Hi-Res). Dự án được xây dựng với kiến trúc Client-Server hiện đại, đề cao hiệu năng, bảo mật và trải nghiệm người dùng theo triết lý *Technical Minimalism & Dark-First*.
+> **SlyByte Shop (Slybyte)** là nền tảng thương mại điện tử chuyên sâu về thiết bị công nghệ chính hãng cao cấp (Laptop cao cấp, Ultrabook, Gaming Pro, Smartphone Flagship, Phụ kiện & Thiết bị âm thanh Hi-Res). Dự án được xây dựng với kiến trúc Client-Server hiện đại, sử dụng **Next.js 14 (App Router)** và **Spring Boot 3**, đề cao hiệu năng, SEO, bảo mật và trải nghiệm người dùng theo triết lý *Technical Minimalism & Dark-First*.
 
 ---
 
@@ -16,6 +16,7 @@
   * Khám phá danh mục thiết bị: Apple, Asus, Dell, Samsung, Sony...
   * Tìm kiếm và lọc sản phẩm theo khoảng giá, thương hiệu, nhóm cấu hình.
   * Xem chi tiết sản phẩm với bảng thông số kỹ thuật (CPU, GPU, RAM, Ổ cứng, Màn hình, Pin).
+  * Hỗ trợ SEO và OpenGraph preview vượt trội nhờ kiến trúc Server-Side Rendering (SSR).
 * **Giỏ hàng & Đặt hàng (Cart & Checkout)**:
   * Quản lý giỏ hàng: Thêm, cập nhật số lượng, xóa sản phẩm.
   * Quy trình đặt hàng (Checkout) với thông tin giao nhận và phương thức thanh toán.
@@ -39,13 +40,12 @@
 | **Security & Auth** | Spring Security + JWT | `6.x` | Xác thực Stateless JWT, mã hóa BCrypt, phân quyền role-based |
 | **Database & ORM** | MySQL + Spring Data JPA | `8.0+` | Cơ sở dữ liệu quan hệ, Hibernate ORM |
 | **Build Tool (Backend)**| Apache Maven | `3.8+` | Quản lý dependencies và build gói JAR |
-| **Frontend Framework** | React | `18.3.1` | Thư viện xây dựng giao diện người dùng |
+| **Frontend Framework** | Next.js (App Router) | `14.2.35` | Full-stack React Framework, SSR, SSG, SEO & Routing |
 | **Language (Frontend)** | TypeScript | `5.6.3` | Định kiểu dữ liệu tĩnh nghiêm ngặt (Strict typing) |
-| **Build Tool (Frontend)**| Vite | `5.4.9` | Development server siêu tốc & Bundle tối ưu |
-| **Routing** | React Router DOM | `6.27.0` | Điều hướng SPA, Protected Route |
+| **Core UI Library** | React | `18.3.1` | Thư viện xây dựng thành phần giao diện |
 | **State Management** | Zustand | `5.0.0` | Quản lý state toàn cục (Auth, User Session) |
 | **Async Data** | TanStack React Query | `5.59.0` | Quản lý server-state, caching dữ liệu |
-| **HTTP Client** | Axios | `1.7.7` | Giao tiếp REST API kèm Interceptor xử lý Bearer Token |
+| **HTTP Client** | Axios | `1.7.7` | Giao tiếp REST API kèm Interceptor xử lý Bearer Token (SSR-safe) |
 | **Styling** | Vanilla CSS (CSS3 Variables) | Standard | Hệ thống Design Tokens Dark-First, không dùng Tailwind |
 
 ---
@@ -59,6 +59,7 @@ SlyByte-Shop/
 ├── .plan/                                   # Kế hoạch phát triển và chuẩn mực kiến trúc
 │   ├── PLAN.md                              # Lộ trình tổng quan dự án
 │   ├── PHASE_3_AUTH_PLAN.md                 # Kế hoạch triển khai Authentication
+│   ├── NEXTJS_MIGRATION_PLAN.md             # Kế hoạch chuyển đổi sang Next.js App Router
 │   ├── FRONTEND_UI_PLAN.md                  # Kế hoạch thiết kế Frontend UI
 │   └── format/
 │       └── format-frontend/
@@ -74,20 +75,26 @@ SlyByte-Shop/
 │   │       ├── entity/                      # JPA Entities (User, Role, Product, ...)
 │   │       ├── dto/                         # Data Transfer Objects (Request/Response)
 │   │       └── exception/                   # Xử lý ngoại lệ toàn cục (Global Exception)
-│   ├── frontend/                            # Mã nguồn Frontend (React + Vite + TS)
+│   ├── frontend/                            # Mã nguồn Frontend (Next.js 14 App Router)
 │   │   ├── package.json                     # Cấu hình Dependencies & Scripts
-│   │   ├── vite.config.ts                   # Cấu hình Vite & Proxy /api sang port 8080
+│   │   ├── next.config.mjs                  # Cấu hình Next.js & Proxy /api sang port 8080
+│   │   ├── tsconfig.json                    # Cấu hình TypeScript cho App Router
 │   │   ├── eslint.config.js                 # Cấu hình ESLint 9 Flat Config
 │   │   └── src/
-│   │       ├── assets/                      # Tài nguyên tĩnh (ảnh, icons)
+│   │       ├── app/                         # Next.js App Router
+│   │       │   ├── globals.css              # Design Tokens & Global CSS System
+│   │       │   ├── layout.tsx               # RootLayout & Metadata SEO
+│   │       │   ├── (storefront)/            # Route Group cho trang bán hàng
+│   │       │   │   ├── layout.tsx           # Bố cục có Navbar và Footer
+│   │       │   │   └── page.tsx             # Trang chủ giới thiệu sản phẩm & test API
+│   │       │   ├── login/
+│   │       │   │   └── page.tsx             # Trang Đăng nhập tài khoản
+│   │       │   └── register/
+│   │       │       └── page.tsx             # Trang Đăng ký thành viên mới
 │   │       ├── components/                  # UI Components (Navbar, Footer, AuthLayout, ...)
-│   │       ├── pages/                       # Trang chính (HomePage, LoginPage, RegisterPage)
-│   │       ├── services/                    # Axios API client & Interceptors
+│   │       ├── services/                    # Axios API client & Interceptors (SSR-safe)
 │   │       ├── store/                       # Zustand Stores (useAuthStore)
-│   │       ├── types/                       # TypeScript interfaces & types
-│   │       ├── index.css                    # Design Tokens & Global CSS System
-│   │       ├── App.tsx                      # App Routing & Auth Bootstrapping
-│   │       └── main.tsx                     # Entry point ReactDOM
+│   │       └── types/                       # TypeScript interfaces & types
 │   └── database/                            # Kịch bản cơ sở dữ liệu
 │       └── schema.sql                       # DDL tạo bảng và dữ liệu khởi tạo
 └── README.md                                # Tài liệu hướng dẫn dự án
@@ -99,11 +106,11 @@ SlyByte-Shop/
 
 - [x] **Phase 1 — Khởi Tạo & Thiết Kế Kiến Trúc**: Định nghĩa MVP Spec, cấu trúc thư mục, thiết kế CSDL (`schema.sql`).
 - [x] **Phase 2 — Nền Tảng Backend**: Khởi tạo Spring Boot 3, JPA Entities, Spring Security, cấu hình JWT Provider & Filters.
-- [x] **Phase 3 — Hoàn Thiện Luồng Xác Thực (Authentication)**:
+- [x] **Phase 3 — Hoàn Thiện Luồng Xác Thực (Authentication) & Di Chuyển Next.js**:
   - *Backend*: REST APIs `/api/auth/register`, `/api/auth/login`, `/api/auth/me`, mã hóa BCrypt, kiểm tra trùng lặp email.
-  - *Frontend*: Thiết lập Design Tokens (Dark-First), Navbar, Footer, AuthLayout (Split Showcase), trang Đăng nhập & Đăng ký, Zustand store đồng bộ token.
-- [ ] **Phase 4 — Danh Mục Sản Phẩm & Chi Tiết Cấu Hình (Catalog & Specs)**: Danh sách sản phẩm, bộ lọc kỹ thuật, tìm kiếm nhanh, trang chi tiết specs.
-- [ ] **Phase 5 — Giỏ Hàng & Thanh Toán (Cart & Checkout)**: Quản lý giỏ hàng bằng Zustand / LocalStorage, quy trình đặt hàng.
+  - *Frontend*: Chuyển đổi thành công sang **Next.js 14 (App Router)**, thiết lập Design Tokens (Dark-First), Navbar, Footer, AuthLayout (Split Showcase), trang Đăng nhập & Đăng ký, Zustand store đồng bộ token SSR-safe.
+- [ ] **Phase 4 — Danh Mục Sản Phẩm & Chi Tiết Cấu Hình (Catalog & Specs)**: Danh sách sản phẩm, bộ lọc kỹ thuật, tìm kiếm nhanh, trang chi tiết specs (SSR).
+- [ ] **Phase 5 — Giỏ Hàng & Thanh Toán (Cart & Checkout)**: Quản lý giỏ hàng bằng Zustand, quy trình đặt hàng.
 - [ ] **Phase 6 — Quản Trị Hệ Thống (Admin Dashboard)**: Trang quản lý sản phẩm, đơn hàng, người dùng cho quyền `ADMIN`.
 
 ---
@@ -153,7 +160,7 @@ SlyByte-Shop/
 
 ---
 
-### 5.4. Khởi chạy Frontend (React + Vite)
+### 5.4. Khởi chạy Frontend (Next.js 14)
 1. Mở một terminal mới và di chuyển vào thư mục frontend:
    ```bash
    cd Code/frontend
@@ -166,9 +173,9 @@ SlyByte-Shop/
    ```bash
    npm run dev
    ```
-   *Giao diện người dùng sẽ chạy tại:* `http://localhost:5173`
+   *Giao diện người dùng sẽ chạy tại:* `http://localhost:3000`
 
-> **Lưu ý**: Vite đã được cấu hình Reverse Proxy sẵn trong `vite.config.ts`. Mọi request xuất phát từ client có tiền tố `/api` sẽ tự động được chuyển tiếp tới máy chủ Spring Boot tại `http://localhost:8080`.
+> **Lưu ý**: Next.js đã được cấu hình Reverse Proxy sẵn trong `next.config.mjs`. Mọi request xuất phát từ client có tiền tố `/api` sẽ tự động được chuyển tiếp tới máy chủ Spring Boot tại `http://localhost:8080`.
 
 ---
 
@@ -178,7 +185,7 @@ Tại thư mục `Code/frontend`:
   ```bash
   npm run lint
   ```
-* Kiểm tra kiểu dữ liệu & Build:
+* Kiểm tra biên dịch Next.js Production Build:
   ```bash
   npm run build
   ```
@@ -188,6 +195,7 @@ Tại thư mục `Code/frontend`:
 ## 📖 6. Tài Liệu Tham Chiếu & Quy Chuẩn
 
 * [MVP Specification](Docs/MVP_SPEC.md) — Đặc tả chi tiết các phân hệ và yêu cầu chức năng MVP.
+* [Next.js Migration Plan](.plan/NEXTJS_MIGRATION_PLAN.md) — Kế hoạch và quy trình chuyển đổi sang Next.js App Router.
 * [UI Rules & Design Standards](.plan/format/format-frontend/ui-rules.md) — Quy chuẩn giao diện, Design Tokens, CSS variables và chuẩn mực lập trình Frontend.
 * [Frontend Implementation Plan](.plan/FRONTEND_UI_PLAN.md) — Kế hoạch chi tiết triển khai giao diện người dùng.
 * [Phase 3 Auth Plan](.plan/PHASE_3_AUTH_PLAN.md) — Đặc tả kỹ thuật luồng Authentication (Backend + Frontend).
