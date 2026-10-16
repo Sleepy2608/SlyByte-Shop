@@ -75,3 +75,8 @@ application-local.yml
 graphify-out/
 graphify-out/cache/
 graphify-out/cost.json
+
+# Next.js build output
+.next/
+out/
+next-env.d.ts
