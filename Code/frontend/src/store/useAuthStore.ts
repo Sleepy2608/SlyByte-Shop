@@ -26,6 +26,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
 
   initAuth: () => {
+    if (typeof window === 'undefined') return;
+
     try {
       const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
       const savedUserStr = localStorage.getItem(USER_STORAGE_KEY);
@@ -63,8 +65,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         role: response.role,
       };
 
-      localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      }
 
       set({
         token: response.token,
@@ -105,8 +109,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         address: userData.address,
       };
 
-      localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      }
 
       set({
         token: response.token,
@@ -134,8 +140,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    localStorage.removeItem(USER_STORAGE_KEY);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(USER_STORAGE_KEY);
+    }
     set({
       user: null,
       token: null,

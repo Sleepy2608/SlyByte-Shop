@@ -1,11 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 /**
- * Token Persistence Strategy Assessment:
- * - Backend cấp phát stateless JWT qua AuthResponse.token (chưa hỗ trợ HttpOnly Cookie).
+ * Token Persistence Strategy (Next.js SSR-Safe):
+ * - Backend cấp phát stateless JWT qua AuthResponse.token (Spring Boot 8080).
  * - Sử dụng key 'slybyte_token' trong localStorage kết hợp đồng bộ trực tiếp vào Zustand store.
- * - Trade-off: Tiện lợi và phù hợp với mô hình SPA + REST API, chấp nhận rủi ro XSS bằng cách
- *   luôn vệ sinh đầu vào và không lưu thông tin nhạy cảm khác trong client storage.
+ * - Kiểm tra typeof window !== 'undefined' để tránh lỗi khi render trên Server.
  */
 export const TOKEN_STORAGE_KEY = 'slybyte_token';
 export const USER_STORAGE_KEY = 'slybyte_user';
@@ -18,12 +17,14 @@ export const api = axios.create({
   timeout: 15000,
 });
 
-// Request Interceptor: Đính kèm Bearer token nếu có
+// Request Interceptor: Đính kèm Bearer token nếu có trên client
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -37,13 +38,12 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const originalRequestUrl = error.config?.url || '';
 
-    // Chỉ dọn session 401 nếu KHÔNG PHẢI request login hay register
-    const isAuthEndpoint = originalRequestUrl.includes('/auth/login') || originalRequestUrl.includes('/auth/register');
+    const isAuthEndpoint =
+      originalRequestUrl.includes('/auth/login') || originalRequestUrl.includes('/auth/register');
 
-    if (status === 401 && !isAuthEndpoint) {
+    if (status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(USER_STORAGE_KEY);
-      // Dispatch custom event để UI / Auth Store phản ứng tự nhiên mà không reload cứng
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
     }
 

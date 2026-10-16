@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 interface AuthLayoutProps {
   title: string;
@@ -13,7 +13,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, childre
       <div className="auth-container">
         {/* Left Side: Brand Showcase */}
         <div className="auth-showcase">
-          <Link to="/" className="showcase-brand">
+          <Link href="/" className="showcase-brand">
             <span className="brand-dot"></span>
             <span className="brand-name">SLYBYTE<span className="brand-accent"> SHOP</span></span>
           </Link>
@@ -61,7 +61,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, childre
         <div className="auth-form-side">
           <div className="auth-form-card">
             <div className="auth-form-header">
-              <Link to="/" className="mobile-brand">
+              <Link href="/" className="mobile-brand">
                 <span className="brand-dot"></span>
                 <span>SLYBYTE<span className="brand-accent"> SHOP</span></span>
               </Link>

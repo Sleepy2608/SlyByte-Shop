@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AuthLayout } from '../components/AuthLayout';
-import { useAuthStore } from '../store/useAuthStore';
+'use client';
 
-export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+import React, { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AuthLayout } from '@/components/AuthLayout';
+import { useAuthStore } from '@/store/useAuthStore';
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading, error, clearError } = useAuthStore();
 
   const [email, setEmail] = useState('');
@@ -13,15 +16,14 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
 
-  // If already authenticated, redirect to home or return path
+  const from = searchParams.get('from') || '/';
+
   useEffect(() => {
     if (isAuthenticated) {
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
-      navigate(from, { replace: true });
+      router.replace(from);
     }
-  }, [isAuthenticated, navigate, location.state]);
+  }, [isAuthenticated, router, from]);
 
-  // Clear store error on mount or unmount
   useEffect(() => {
     clearError();
     return () => clearError();
@@ -50,8 +52,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login({ email: email.trim(), password });
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
-      navigate(from, { replace: true });
+      router.replace(from);
     } catch {
       // Error is tracked in useAuthStore.error
     }
@@ -152,11 +153,19 @@ export const LoginPage: React.FC = () => {
         {/* Footer links */}
         <div className="auth-form-footer">
           <span>Chưa có tài khoản Slybyte? </span>
-          <Link to="/register" className="auth-link">
+          <Link href="/register" className="auth-link">
             Đăng ký ngay
           </Link>
         </div>
       </form>
     </AuthLayout>
   );
-};
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="auth-page"><span className="spinner"></span></div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}

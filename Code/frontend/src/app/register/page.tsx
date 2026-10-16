@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthLayout } from '../components/AuthLayout';
-import { useAuthStore } from '../store/useAuthStore';
+'use client';
 
-export const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { AuthLayout } from '@/components/AuthLayout';
+import { useAuthStore } from '@/store/useAuthStore';
+
+export default function RegisterPage() {
+  const router = useRouter();
   const { register, isAuthenticated, isLoading, error, clearError } = useAuthStore();
 
   const [formData, setFormData] = useState({
@@ -27,9 +30,9 @@ export const RegisterPage: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      router.replace('/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     clearError();
@@ -39,7 +42,6 @@ export const RegisterPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
     if (validationErrors[name as keyof typeof validationErrors]) {
       setValidationErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -92,7 +94,7 @@ export const RegisterPage: React.FC = () => {
         phone: formData.phone.trim() || undefined,
         address: formData.address.trim() || undefined,
       });
-      navigate('/', { replace: true });
+      router.replace('/');
     } catch {
       // Error is caught and tracked in Zustand store
     }
@@ -265,11 +267,11 @@ export const RegisterPage: React.FC = () => {
         {/* Footer */}
         <div className="auth-form-footer">
           <span>Đã có tài khoản Slybyte? </span>
-          <Link to="/login" className="auth-link">
+          <Link href="/login" className="auth-link">
             Đăng nhập ngay
           </Link>
         </div>
       </form>
     </AuthLayout>
   );
-};
+}
