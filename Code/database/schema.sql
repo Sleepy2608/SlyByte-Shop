@@ -2,11 +2,11 @@
 -- DATABASE SCHEMA - Shop Bán Hàng Đồ Công Nghệ (MVP)
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS shop_ban_hang
+CREATE DATABASE IF NOT EXISTS slybyte_shop
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE shop_ban_hang;
+USE slybyte_shop;
 
 -- ============================================================
 -- 1. USERS

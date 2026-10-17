@@ -2,7 +2,7 @@
 -- SAMPLE DATA - Shop Bán Hàng Đồ Công Nghệ
 -- ============================================================
 
-USE shop_ban_hang;
+USE slybyte_shop;
 
 -- ============================================================
 -- USERS (password = "password123" - BCrypt hash)

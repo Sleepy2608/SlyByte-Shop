@@ -4,9 +4,9 @@ spring:
 
   # =================== DATABASE ===================
   datasource:
-    url: jdbc:mysql://localhost:3306/shop_ban_hang?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/slybyte_shop?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
     username: root
-    password: your_password_here   # <-- Đổi thành mật khẩu MySQL của bạn
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # =================== JPA / HIBERNATE ===================
