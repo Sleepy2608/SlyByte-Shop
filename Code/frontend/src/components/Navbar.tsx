@@ -27,9 +27,9 @@ export const Navbar: React.FC = () => {
         {/* Categories navigation */}
         <nav className="navbar-nav">
           <Link href="/" className={`nav-link ${pathname === '/' ? 'active' : ''}`}>Trang chủ</Link>
-          <span className="nav-link disabled" title="Đang phát triển ở Phase 4">Sản phẩm</span>
-          <span className="nav-link disabled" title="Đang phát triển ở Phase 4">Laptop</span>
-          <span className="nav-link disabled" title="Đang phát triển ở Phase 4">Điện thoại</span>
+          <Link href="/products" className={`nav-link ${pathname === '/products' ? 'active' : ''}`}>Sản phẩm</Link>
+          <Link href="/products?category=1" className="nav-link">Laptop</Link>
+          <Link href="/products?category=2" className="nav-link">Điện thoại</Link>
         </nav>
 
         {/* User / Auth action */}
