@@ -60,6 +60,11 @@ export const Navbar: React.FC = () => {
                 <span className="user-name">{user.fullName || user.email}</span>
                 {user.role === 'ADMIN' && <span className="role-tag">ADMIN</span>}
               </div>
+              {user.role === 'ADMIN' && (
+                <Link href="/admin" className="btn btn-outline btn-sm" style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }} title="Phân hệ Quản trị">
+                  Quản trị
+                </Link>
+              )}
               <Link href="/orders" className="btn btn-ghost btn-sm" title="Lịch sử đơn hàng">
                 Đơn hàng
               </Link>
