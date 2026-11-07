@@ -3,7 +3,7 @@ import './globals.css';
 import { AuthInitializer } from '@/components/AuthInitializer';
 
 export const metadata: Metadata = {
-  title: 'SlyByte Shop — Nền Tảng Thiết Bị Công Nghệ Cao Cấp',
+  title: 'SlyByte Shop | Nền Tảng Thiết Bị Công Nghệ Cao Cấp',
   description: 'Hệ sinh thái thiết bị công nghệ chính hãng Slybyte. Phân phối Laptop Flagship, Gaming Pro, Smartphone và Linh kiện chuẩn hóa.',
 };
 

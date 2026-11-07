@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ProductSummary } from '@/types/product.types';
+import { IconLaptop } from '@/components/ui/Icons';
 
 interface ProductCardProps {
   product: ProductSummary;
@@ -20,7 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const isOutOfStock = product.status === 'OUT_OF_STOCK' || product.stockQuantity <= 0;
 
   return (
-    <div className="product-card">
+    <article className="product-card">
       <div className="product-thumb-container">
         {hasDiscount && (
           <span className="product-badge-tag discount-badge">-{product.discountPercentage}%</span>
@@ -38,7 +39,9 @@ export function ProductCard({ product }: ProductCardProps) {
               loading="lazy"
             />
           ) : (
-            <span className="product-thumb-icon">⚡</span>
+            <span className="product-thumb-icon">
+              <IconLaptop size={36} />
+            </span>
           )}
         </Link>
 
@@ -76,6 +79,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

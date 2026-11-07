@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProductImage } from '@/types/product.types';
+import { IconLaptop } from '@/components/ui/Icons';
 
 interface ProductGalleryProps {
   images: ProductImage[];
@@ -14,7 +15,6 @@ export function ProductGallery({
   fallbackThumbnail,
   productName,
 }: ProductGalleryProps) {
-  // Chuẩn bị danh sách ảnh đầy đủ
   const allImages = React.useMemo(() => {
     if (images && images.length > 0) {
       return images;
@@ -37,22 +37,20 @@ export function ProductGallery({
 
   return (
     <div className="product-gallery">
-      {/* Khung ảnh chính */}
       <div className="gallery-main-container">
         {currentImage?.imageUrl ? (
           <img
             src={currentImage.imageUrl}
-            alt={`${productName} - Ảnh ${activeIdx + 1}`}
+            alt={`${productName} (Hình ${activeIdx + 1})`}
             className="gallery-main-img"
           />
         ) : (
           <div className="gallery-placeholder">
-            <span>💻</span>
+            <IconLaptop size={56} />
           </div>
         )}
       </div>
 
-      {/* Dãy thumbnail nhỏ bên dưới */}
       {allImages.length > 1 && (
         <div className="gallery-thumbnails-row">
           {allImages.map((img, idx) => (
@@ -64,7 +62,7 @@ export function ProductGallery({
             >
               <img
                 src={img.imageUrl}
-                alt={`${productName} thumbnail ${idx + 1}`}
+                alt={`${productName} thu nhỏ ${idx + 1}`}
                 className="gallery-thumb-img"
               />
             </button>
