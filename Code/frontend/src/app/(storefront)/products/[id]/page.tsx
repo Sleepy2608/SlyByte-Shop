@@ -2,16 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { productService } from '@/services/productService';
 import { ProductDetail, ProductSummary } from '@/types/product.types';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductSpecsTable } from '@/components/product/ProductSpecsTable';
 import { ProductCard } from '@/components/product/ProductCard';
+import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const idOrSlug = params?.id as string;
+
+  const { addItem, isLoading: isCartLoading } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
 
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ProductSummary[]>([]);
@@ -78,11 +84,41 @@ export default function ProductDetailPage() {
     }).format(value);
   };
 
-  const handleAddToCart = () => {
-    setAddedNotice(true);
-    setTimeout(() => {
-      setAddedNotice(false);
-    }, 3000);
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Đi đến trang đăng nhập ngay?')) {
+        router.push(`/login?from=/products/${idOrSlug}`);
+      }
+      return;
+    }
+    if (!product) return;
+
+    try {
+      await addItem(product.id, 1);
+      setAddedNotice(true);
+      setTimeout(() => {
+        setAddedNotice(false);
+      }, 3500);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Không thể thêm sản phẩm vào giỏ hàng.');
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      if (confirm('Bạn cần đăng nhập để đặt mua sản phẩm. Đi đến trang đăng nhập ngay?')) {
+        router.push(`/login?from=/products/${idOrSlug}`);
+      }
+      return;
+    }
+    if (!product) return;
+
+    try {
+      await addItem(product.id, 1);
+      router.push('/cart');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Không thể thêm sản phẩm vào giỏ hàng.');
+    }
   };
 
   if (loading) {
@@ -197,16 +233,16 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className="btn btn-outline btn-add-cart"
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || isCartLoading}
                 onClick={handleAddToCart}
               >
-                🛒 Thêm vào giỏ hàng
+                {isCartLoading ? 'Đang thêm...' : '🛒 Thêm vào giỏ hàng'}
               </button>
               <button
                 type="button"
                 className="btn btn-primary btn-buy-now"
-                disabled={isOutOfStock}
-                onClick={handleAddToCart}
+                disabled={isOutOfStock || isCartLoading}
+                onClick={handleBuyNow}
               >
                 Mua ngay
               </button>

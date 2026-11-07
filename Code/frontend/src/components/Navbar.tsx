@@ -1,17 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useCartStore } from '@/store/useCartStore';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { totalItems, fetchCart, reset: resetCart } = useCartStore();
   const router = useRouter();
   const pathname = usePathname();
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+    } else {
+      resetCart();
+    }
+  }, [isAuthenticated, fetchCart, resetCart]);
+
   const handleLogout = () => {
     logout();
+    resetCart();
     router.push('/login');
   };
 
@@ -32,8 +43,16 @@ export const Navbar: React.FC = () => {
           <Link href="/products?category=2" className="nav-link">Điện thoại</Link>
         </nav>
 
-        {/* User / Auth action */}
+        {/* User / Cart / Auth actions */}
         <div className="navbar-actions">
+          {/* Cart Icon Link */}
+          <Link href="/cart" className="navbar-cart-btn" title="Giỏ hàng">
+            <span>🛒</span>
+            {totalItems > 0 && (
+              <span className="cart-badge">{totalItems}</span>
+            )}
+          </Link>
+
           {isAuthenticated && user ? (
             <div className="user-menu">
               <div className="user-badge">
