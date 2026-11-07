@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { adminService } from '@/services/adminService';
 import { DashboardStats } from '@/types/admin.types';
 import { OrderDetail, OrderStatus } from '@/types/order.types';
+import {
+  IconCreditCard,
+  IconPackage,
+  IconUsers,
+  IconLaptop,
+  IconArrowRight,
+} from '@/components/ui/Icons';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -65,77 +72,82 @@ export default function AdminDashboardPage() {
     return (
       <div>
         <div className="admin-stats-grid">
-          <div className="skeleton-thumb shimmer" style={{ height: '110px', borderRadius: '12px' }} />
-          <div className="skeleton-thumb shimmer" style={{ height: '110px', borderRadius: '12px' }} />
-          <div className="skeleton-thumb shimmer" style={{ height: '110px', borderRadius: '12px' }} />
-          <div className="skeleton-thumb shimmer" style={{ height: '110px', borderRadius: '12px' }} />
+          <div className="skeleton-thumb shimmer admin-skeleton-stat" />
+          <div className="skeleton-thumb shimmer admin-skeleton-stat" />
+          <div className="skeleton-thumb shimmer admin-skeleton-stat" />
+          <div className="skeleton-thumb shimmer admin-skeleton-stat" />
         </div>
-        <div className="skeleton-thumb shimmer" style={{ height: '300px', borderRadius: '12px' }} />
+        <div className="skeleton-thumb shimmer admin-skeleton-table" />
       </div>
     );
   }
 
   return (
     <div>
-      {/* 4 Thẻ Thống Kê Chính */}
       <div className="admin-stats-grid">
-        {/* Doanh thu */}
         <div className="admin-stat-card">
           <div className="admin-stat-header">
             <span>Tổng Doanh Thu</span>
-            <span className="admin-stat-icon">💰</span>
+            <span className="admin-stat-icon">
+              <IconCreditCard size={18} />
+            </span>
           </div>
-          <div className="admin-stat-value" style={{ color: 'var(--color-primary)' }}>
+          <div className="admin-stat-value text-accent tabular-nums">
             {formatPrice(stats?.totalRevenue || 0)}
           </div>
           <div className="admin-stat-subtext">Đã ghi nhận trong hệ thống</div>
         </div>
 
-        {/* Tổng đơn hàng & Đơn chờ duyệt */}
         <div className="admin-stat-card">
           <div className="admin-stat-header">
             <span>Đơn Hàng Chờ Xử Lý</span>
-            <span className="admin-stat-icon">📦</span>
+            <span className="admin-stat-icon">
+              <IconPackage size={18} />
+            </span>
           </div>
-          <div className="admin-stat-value" style={{ color: '#faad14' }}>
+          <div className="admin-stat-value text-warning tabular-nums">
             {stats?.pendingOrders || 0}
           </div>
           <div className="admin-stat-subtext">Trên tổng số {stats?.totalOrders || 0} đơn hàng</div>
         </div>
 
-        {/* Khách hàng */}
         <div className="admin-stat-card">
           <div className="admin-stat-header">
-            <span>Khách Hàng Đã Đăng Ký</span>
-            <span className="admin-stat-icon">👥</span>
+            <span>Khách Hàng Đăng Ký</span>
+            <span className="admin-stat-icon">
+              <IconUsers size={18} />
+            </span>
           </div>
-          <div className="admin-stat-value">
+          <div className="admin-stat-value tabular-nums">
             {stats?.totalCustomers || 0}
           </div>
           <div className="admin-stat-subtext">Tài khoản thành viên hoạt động</div>
         </div>
 
-        {/* Sản phẩm trong kho */}
         <div className="admin-stat-card">
           <div className="admin-stat-header">
             <span>Thiết Bị Đang Mở Bán</span>
-            <span className="admin-stat-icon">💻</span>
+            <span className="admin-stat-icon">
+              <IconLaptop size={18} />
+            </span>
           </div>
-          <div className="admin-stat-value">
+          <div className="admin-stat-value tabular-nums">
             {stats?.totalProducts || 0}
           </div>
           <div className="admin-stat-subtext">
-            {stats?.outOfStockProducts ? `${stats.outOfStockProducts} sản phẩm tạm hết hàng` : 'Đủ tồn kho cung ứng'}
+            {stats?.outOfStockProducts
+              ? `${stats.outOfStockProducts} sản phẩm tạm hết hàng`
+              : 'Đủ tồn kho cung ứng'}
           </div>
         </div>
       </div>
 
-      {/* Bảng Đơn Hàng Gần Đây */}
       <div className="admin-table-card">
         <div className="admin-table-toolbar">
           <h2 className="admin-table-title">Đơn Hàng Cần Xử Lý Gần Đây</h2>
           <Link href="/admin/orders" className="btn btn-outline btn-sm">
-            Xem tất cả đơn hàng &rarr;
+            <span>Xem tất cả đơn hàng</span>
+            <IconArrowRight size={14} />
           </Link>
         </div>
 
@@ -155,7 +167,7 @@ export default function AdminDashboardPage() {
             <tbody>
               {recentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} className="admin-table-empty">
                     Chưa có đơn hàng nào được ghi nhận.
                   </td>
                 </tr>
@@ -163,25 +175,19 @@ export default function AdminDashboardPage() {
                 recentOrders.map((order) => (
                   <tr key={order.id}>
                     <td>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--color-primary)' }}>
-                        {order.orderCode}
-                      </span>
+                      <span className="mono-code">{order.orderCode}</span>
                     </td>
                     <td>{order.recipientName}</td>
-                    <td>{order.phone}</td>
-                    <td style={{ fontWeight: 700 }}>{formatPrice(order.totalAmount)}</td>
+                    <td className="tabular-nums">{order.phone}</td>
+                    <td className="text-strong tabular-nums">{formatPrice(order.totalAmount)}</td>
                     <td>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      <span className="text-muted-sm">
                         {order.paymentMethod === 'COD' ? 'COD' : 'Chuyển khoản'}
                       </span>
                     </td>
                     <td>{renderStatusBadge(order.orderStatus)}</td>
                     <td>
-                      <Link
-                        href={`/admin/orders`}
-                        className="btn btn-ghost btn-sm"
-                        style={{ padding: '4px 8px', fontSize: '0.8rem' }}
-                      >
+                      <Link href="/admin/orders" className="btn btn-ghost btn-sm">
                         Quản lý
                       </Link>
                     </td>
@@ -195,4 +201,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-

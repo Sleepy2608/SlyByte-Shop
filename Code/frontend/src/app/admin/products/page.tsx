@@ -5,21 +5,21 @@ import { productService } from '@/services/productService';
 import { adminService } from '@/services/adminService';
 import { ProductSummary, Category, Brand } from '@/types/product.types';
 import { AdminProductPayload } from '@/types/admin.types';
+import { IconLaptop, IconX, IconArrowLeft, IconArrowRight } from '@/components/ui/Icons';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Bộ lọc
   const [keyword, setKeyword] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Modal thêm/sửa sản phẩm
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formName, setFormName] = useState('');
@@ -53,7 +53,6 @@ export default function AdminProductsPage() {
   }, [keyword, selectedCategory, selectedBrand]);
 
   useEffect(() => {
-    // Tải danh mục và thương hiệu
     Promise.all([productService.getCategories(), productService.getBrands()])
       .then(([cats, brds]) => {
         setCategories(cats);
@@ -67,6 +66,7 @@ export default function AdminProductsPage() {
   }, [fetchProducts]);
 
   const handleOpenCreateModal = () => {
+    setFeedbackMsg(null);
     setEditingId(null);
     setFormName('');
     setFormOriginalPrice(30000000);
@@ -78,6 +78,7 @@ export default function AdminProductsPage() {
   };
 
   const handleOpenEditModal = (p: ProductSummary) => {
+    setFeedbackMsg(null);
     setEditingId(p.id);
     setFormName(p.name);
     setFormOriginalPrice(p.originalPrice);
@@ -93,7 +94,7 @@ export default function AdminProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) {
-      alert('Vui lòng nhập tên thiết bị!');
+      setFeedbackMsg({ type: 'error', text: 'Vui lòng nhập tên thiết bị.' });
       return;
     }
 
@@ -109,32 +110,38 @@ export default function AdminProductsPage() {
     };
 
     setIsSubmitting(true);
+    setFeedbackMsg(null);
     try {
       if (editingId) {
         await adminService.updateProduct(editingId, payload);
-        alert('Cập nhật thông tin thiết bị thành công!');
+        setFeedbackMsg({ type: 'success', text: `Đã cập nhật thiết bị "${payload.name}" thành công.` });
       } else {
         await adminService.createProduct(payload);
-        alert('Thêm thiết bị mới vào danh mục thành công!');
+        setFeedbackMsg({ type: 'success', text: `Đã thêm thiết bị "${payload.name}" vào kho hàng.` });
       }
       setIsModalOpen(false);
       await fetchProducts(page);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi khi lưu sản phẩm.');
+      setFeedbackMsg({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Lỗi khi lưu thông tin sản phẩm.',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa/ẩn thiết bị "${name}"?`)) {
-      try {
-        await adminService.deleteProduct(id);
-        alert('Đã xóa sản phẩm thành công!');
-        await fetchProducts(page);
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Không thể xóa sản phẩm.');
-      }
+    setFeedbackMsg(null);
+    try {
+      await adminService.deleteProduct(id);
+      setFeedbackMsg({ type: 'success', text: `Đã gỡ thiết bị "${name}" khỏi danh mục.` });
+      await fetchProducts(page);
+    } catch (err: unknown) {
+      setFeedbackMsg({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Không thể xóa sản phẩm.',
+      });
     }
   };
 
@@ -147,13 +154,28 @@ export default function AdminProductsPage() {
 
   return (
     <div>
+      {feedbackMsg && (
+        <div
+          className={`alert ${feedbackMsg.type === 'success' ? 'alert-success' : 'alert-error'} alert-dismissible`}
+          role="status"
+        >
+          <span>{feedbackMsg.text}</span>
+          <button
+            type="button"
+            className="alert-close-btn"
+            onClick={() => setFeedbackMsg(null)}
+            aria-label="Đóng thông báo"
+          >
+            <IconX size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="admin-table-card">
-        {/* Toolbar */}
         <div className="admin-table-toolbar">
-          <h2 className="admin-table-title">Quản Lý Sản Phẩm & Kho Hàng</h2>
+          <h2 className="admin-table-title">Quản Lý Sản Phẩm &amp; Kho Hàng</h2>
 
           <div className="admin-table-filters">
-            {/* Search */}
             <input
               type="text"
               className="admin-select"
@@ -161,10 +183,8 @@ export default function AdminProductsPage() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchProducts(0)}
-              style={{ minWidth: '180px' }}
             />
 
-            {/* Category */}
             <select
               className="admin-select"
               value={selectedCategory}
@@ -178,7 +198,6 @@ export default function AdminProductsPage() {
               ))}
             </select>
 
-            {/* Brand */}
             <select
               className="admin-select"
               value={selectedBrand}
@@ -196,14 +215,12 @@ export default function AdminProductsPage() {
               type="button"
               className="btn btn-primary btn-sm"
               onClick={handleOpenCreateModal}
-              style={{ whiteSpace: 'nowrap' }}
             >
               + Thêm Thiết Bị
             </button>
           </div>
         </div>
 
-        {/* Bảng sản phẩm */}
         <div className="admin-table-wrapper">
           <table className="admin-table">
             <thead>
@@ -221,13 +238,13 @@ export default function AdminProductsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '32px' }}>
+                  <td colSpan={8} className="admin-table-empty">
                     Đang nạp dữ liệu sản phẩm...
                   </td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                  <td colSpan={8} className="admin-table-empty">
                     Không có sản phẩm nào phù hợp với bộ lọc tìm kiếm.
                   </td>
                 </tr>
@@ -235,41 +252,35 @@ export default function AdminProductsPage() {
                 products.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '6px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      <div className="admin-product-thumb">
                         {p.thumbnail ? (
-                          <img src={p.thumbnail} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          <img src={p.thumbnail} alt={p.name} className="admin-product-thumb-img" />
                         ) : (
-                          <span>💻</span>
+                          <IconLaptop size={18} />
                         )}
                       </div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{p.name}</div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                        ID: #{p.id}
-                      </span>
+                      <div className="text-strong">{p.name}</div>
+                      <span className="mono-id">ID #{p.id}</span>
                     </td>
                     <td>
-                      <span className="product-brand-tag" style={{ fontSize: '0.72rem' }}>
-                        {p.brandName || 'N/A'}
-                      </span>
+                      <span className="detail-category-badge">{p.brandName || 'N/A'}</span>
                     </td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{p.categoryName || 'N/A'}</td>
+                    <td className="text-muted-sm">{p.categoryName || 'N/A'}</td>
                     <td>
-                      <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
-                        {formatPrice(p.salePrice)}
-                      </div>
+                      <div className="text-accent tabular-nums">{formatPrice(p.salePrice)}</div>
                       {p.originalPrice > p.salePrice && (
-                        <div style={{ fontSize: '0.75rem', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
+                        <div className="product-original-price tabular-nums">
                           {formatPrice(p.originalPrice)}
                         </div>
                       )}
                     </td>
-                    <td>
-                      <strong style={{ color: p.stockQuantity <= 3 ? '#ff4d4f' : 'inherit' }}>
+                    <td className="tabular-nums">
+                      <strong className={p.stockQuantity <= 3 ? 'text-danger' : 'text-strong'}>
                         {p.stockQuantity}
                       </strong>{' '}
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>máy</span>
+                      <span className="text-muted-sm">máy</span>
                     </td>
                     <td>
                       {p.status === 'ACTIVE' && p.stockQuantity > 0 ? (
@@ -279,19 +290,17 @@ export default function AdminProductsPage() {
                       )}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div className="admin-row-actions">
                         <button
                           type="button"
                           className="btn btn-outline btn-sm"
-                          style={{ padding: '4px 8px', fontSize: '0.8rem' }}
                           onClick={() => handleOpenEditModal(p)}
                         >
                           Sửa
                         </button>
                         <button
                           type="button"
-                          className="btn btn-ghost btn-sm"
-                          style={{ padding: '4px 8px', fontSize: '0.8rem', color: '#ff4d4f' }}
+                          className="btn btn-ghost btn-sm btn-danger-ghost"
                           onClick={() => handleDelete(p.id, p.name)}
                         >
                           Xóa
@@ -305,33 +314,33 @@ export default function AdminProductsPage() {
           </table>
         </div>
 
-        {/* Phân trang */}
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', padding: '16px' }}>
+          <div className="admin-pagination-bar">
             <button
               type="button"
-              className="btn btn-outline btn-sm"
+              className="pagination-btn"
               disabled={page <= 0}
               onClick={() => fetchProducts(page - 1)}
             >
-              &larr; Trang trước
+              <IconArrowLeft size={14} />
+              <span>Trang trước</span>
             </button>
-            <span style={{ alignSelf: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <span className="pagination-status-text">
               Trang {page + 1} / {totalPages}
             </span>
             <button
               type="button"
-              className="btn btn-outline btn-sm"
+              className="pagination-btn"
               disabled={page >= totalPages - 1}
               onClick={() => fetchProducts(page + 1)}
             >
-              Trang sau &rarr;
+              <span>Trang sau</span>
+              <IconArrowRight size={14} />
             </button>
           </div>
         )}
       </div>
 
-      {/* Modal Thêm / Chỉnh Sửa Sản Phẩm */}
       {isModalOpen && (
         <div className="admin-modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
@@ -343,16 +352,20 @@ export default function AdminProductsPage() {
                 type="button"
                 className="admin-modal-close"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Đóng hộp thoại"
               >
-                ✕
+                <IconX size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit}>
               <div className="admin-modal-body">
                 <div className="form-group">
-                  <label className="form-label">Tên thiết bị công nghệ <span style={{ color: '#ff4d4f' }}>*</span></label>
+                  <label className="form-label" htmlFor="prod-name">
+                    Tên thiết bị công nghệ <span className="label-required">*</span>
+                  </label>
                   <input
+                    id="prod-name"
                     type="text"
                     className="form-input"
                     placeholder="VD: MacBook Pro 16 inch M3 Max"
@@ -362,10 +375,11 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="checkout-form-grid">
                   <div className="form-group">
-                    <label className="form-label">Danh mục</label>
+                    <label className="form-label" htmlFor="prod-cat">Danh mục</label>
                     <select
+                      id="prod-cat"
                       className="form-input"
                       value={formCategory}
                       onChange={(e) => setFormCategory(Number(e.target.value))}
@@ -377,8 +391,9 @@ export default function AdminProductsPage() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Hãng sản xuất</label>
+                    <label className="form-label" htmlFor="prod-brand">Hãng sản xuất</label>
                     <select
+                      id="prod-brand"
                       className="form-input"
                       value={formBrand}
                       onChange={(e) => setFormBrand(Number(e.target.value))}
@@ -390,10 +405,11 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                <div className="admin-form-grid-3">
                   <div className="form-group">
-                    <label className="form-label">Giá niêm yết (VND)</label>
+                    <label className="form-label" htmlFor="prod-orig-price">Giá niêm yết (VND)</label>
                     <input
+                      id="prod-orig-price"
                       type="number"
                       className="form-input"
                       value={formOriginalPrice}
@@ -403,8 +419,9 @@ export default function AdminProductsPage() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Giá khuyến mãi (VND)</label>
+                    <label className="form-label" htmlFor="prod-sale-price">Giá bán (VND)</label>
                     <input
+                      id="prod-sale-price"
                       type="number"
                       className="form-input"
                       value={formSalePrice}
@@ -414,8 +431,9 @@ export default function AdminProductsPage() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Tồn kho</label>
+                    <label className="form-label" htmlFor="prod-stock">Tồn kho</label>
                     <input
+                      id="prod-stock"
                       type="number"
                       className="form-input"
                       value={formStock}
@@ -426,8 +444,9 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">URL ảnh đại diện (Thumbnail)</label>
+                  <label className="form-label" htmlFor="prod-thumb">URL ảnh đại diện (Thumbnail)</label>
                   <input
+                    id="prod-thumb"
                     type="url"
                     className="form-input"
                     placeholder="https://..."
@@ -437,8 +456,9 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Mô tả tóm tắt tính năng</label>
+                  <label className="form-label" htmlFor="prod-desc">Mô tả tóm tắt tính năng</label>
                   <textarea
+                    id="prod-desc"
                     className="form-textarea"
                     placeholder="Giới thiệu điểm nổi bật về hiệu năng, màn hình, cấu hình..."
                     value={formDescription}
@@ -470,4 +490,3 @@ export default function AdminProductsPage() {
     </div>
   );
 }
-

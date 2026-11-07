@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { orderService } from '@/services/orderService';
 import { OrderStatus, OrderSummary } from '@/types/order.types';
+import { IconPackage, IconArrowRight, IconArrowLeft } from '@/components/ui/Icons';
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -43,17 +44,13 @@ export default function OrdersPage() {
   }, [isAuthenticated, router, fetchOrders]);
 
   const handleCancelOrder = async (orderCode: string) => {
-    if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${orderCode}?`)) {
-      return;
-    }
-
     setCancellingCode(orderCode);
+    setError(null);
     try {
       await orderService.cancelOrder(orderCode);
-      // Cập nhật lại danh sách đơn hàng
       await fetchOrders(page);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Không thể hủy đơn hàng vào lúc này.');
+      setError(err instanceof Error ? err.message : 'Không thể hủy đơn hàng vào lúc này.');
     } finally {
       setCancellingCode(null);
     }
@@ -102,46 +99,48 @@ export default function OrdersPage() {
   return (
     <div className="orders-page">
       <div className="container">
-        {/* Header */}
         <div className="checkout-header">
           <h1 className="checkout-title">Lịch Sử Mua Hàng</h1>
           <p className="checkout-subtitle">
-            Theo dõi hành trình vận chuyển và trạng thái các thiết bị công nghệ bạn đã đặt.
+            Theo dõi lộ trình giao vận và trạng thái các thiết bị công nghệ bạn đã đặt.
           </p>
         </div>
 
         {error && (
-          <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+          <div className="alert alert-error" role="alert">
             <span>{error}</span>
           </div>
         )}
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="skeleton-thumb shimmer" style={{ height: '100px', borderRadius: '12px' }} />
-            <div className="skeleton-thumb shimmer" style={{ height: '100px', borderRadius: '12px' }} />
-            <div className="skeleton-thumb shimmer" style={{ height: '100px', borderRadius: '12px' }} />
+          <div className="orders-list">
+            <div className="skeleton-thumb shimmer order-skeleton-row" />
+            <div className="skeleton-thumb shimmer order-skeleton-row" />
+            <div className="skeleton-thumb shimmer order-skeleton-row" />
           </div>
         ) : orders.length === 0 ? (
           <div className="cart-empty-container">
-            <div className="cart-empty-icon">📦</div>
+            <div className="cart-empty-icon">
+              <IconPackage size={36} />
+            </div>
             <h2 className="cart-empty-title">Bạn Chưa Có Đơn Hàng Nào</h2>
             <p className="cart-empty-desc">
-              Khám phá ngay các dòng Laptop cao cấp, Smartphone Flagship và phụ kiện công nghệ chính hãng để đặt mua thiết bị đầu tiên!
+              Khám phá các dòng Laptop Workstation, Smartphone Flagship và thiết bị công nghệ chính hãng để đặt đơn hàng đầu tiên.
             </p>
-            <Link href="/products" className="btn btn-primary btn-lg" style={{ marginTop: 'var(--space-2)' }}>
-              Khám Phá Sản Phẩm Ngay &rarr;
+            <Link href="/products" className="btn btn-primary btn-lg">
+              <span>Khám Phá Kho Thiết Bị</span>
+              <IconArrowRight size={16} />
             </Link>
           </div>
         ) : (
           <div className="orders-list">
             {orders.map((order) => (
-              <div key={order.id} className="order-card">
+              <article key={order.id} className="order-card">
                 <div className="order-card-header">
-                  <div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Mã đơn: </span>
+                  <div className="order-card-meta">
+                    <span className="order-meta-label">Mã đơn:</span>
                     <span className="order-card-code">{order.orderCode}</span>
-                    <span style={{ margin: '0 8px', color: 'var(--border-strong)' }}>•</span>
+                    <span className="order-meta-divider">/</span>
                     <span className="order-card-date">{formatDate(order.createdAt)}</span>
                   </div>
                   <div>
@@ -151,20 +150,20 @@ export default function OrdersPage() {
 
                 <div className="order-card-body">
                   <div className="order-card-info">
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                    <span className="order-info-primary">
                       Người nhận: <strong>{order.recipientName}</strong>
                     </span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                      Hình thức: {order.paymentMethod === 'COD' ? 'Tiền mặt khi nhận hàng (COD)' : 'Chuyển khoản ngân hàng'}
+                    <span className="order-info-secondary">
+                      Phương thức: {order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 'Chuyển khoản ngân hàng'}
                     </span>
                   </div>
 
-                  <div style={{ textAlign: 'right' }}>
+                  <div className="order-card-pricing">
                     <div className="order-card-amount">
                       {formatPrice(order.totalAmount)}
                     </div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                      ({order.totalItems} thiết bị)
+                    <span className="order-info-secondary">
+                      {order.totalItems} thiết bị
                     </span>
                   </div>
 
@@ -173,14 +172,14 @@ export default function OrdersPage() {
                       href={`/order-success/${order.orderCode}`}
                       className="btn btn-outline btn-sm"
                     >
-                      Chi tiết &rarr;
+                      <span>Chi tiết</span>
+                      <IconArrowRight size={14} />
                     </Link>
 
                     {order.orderStatus === 'PENDING' && (
                       <button
                         type="button"
-                        className="btn btn-ghost btn-sm"
-                        style={{ color: '#ff4d4f' }}
+                        className="btn btn-ghost btn-sm btn-danger-ghost"
                         disabled={cancellingCode === order.orderCode}
                         onClick={() => handleCancelOrder(order.orderCode)}
                       >
@@ -189,30 +188,31 @@ export default function OrdersPage() {
                     )}
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
 
-            {/* Phân trang */}
             {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: 'var(--space-6)' }}>
+              <div className="pagination-wrapper">
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm"
+                  className="pagination-btn"
                   disabled={page <= 0}
                   onClick={() => fetchOrders(page - 1)}
                 >
-                  &larr; Trang trước
+                  <IconArrowLeft size={14} />
+                  <span>Trang trước</span>
                 </button>
-                <span style={{ alignSelf: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                <span className="pagination-status-text">
                   Trang {page + 1} / {totalPages}
                 </span>
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm"
+                  className="pagination-btn"
                   disabled={page >= totalPages - 1}
                   onClick={() => fetchOrders(page + 1)}
                 >
-                  Trang sau &rarr;
+                  <span>Trang sau</span>
+                  <IconArrowRight size={14} />
                 </button>
               </div>
             )}
@@ -222,4 +222,3 @@ export default function OrdersPage() {
     </div>
   );
 }
-

@@ -7,6 +7,16 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
 import { orderService } from '@/services/orderService';
 import { PaymentMethod } from '@/types/order.types';
+import {
+  IconShoppingBag,
+  IconCash,
+  IconBank,
+  IconLaptop,
+  IconLock,
+  IconBolt,
+  IconArrowRight,
+  IconArrowLeft,
+} from '@/components/ui/Icons';
 import axios from 'axios';
 
 export default function CheckoutPage() {
@@ -23,7 +33,6 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Điền trước thông tin từ tài khoản nếu có
   useEffect(() => {
     if (user) {
       if (user.fullName) setRecipientName(user.fullName);
@@ -32,7 +41,6 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  // Kiểm tra đăng nhập
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login?from=/checkout');
@@ -67,7 +75,7 @@ export default function CheckoutPage() {
     }
 
     if (!cart || cart.items.length === 0) {
-      setErrorMessage('Giỏ hàng của bạn đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.');
+      setErrorMessage('Giỏ hàng của bạn đang trống. Vui lòng chọn sản phẩm trước khi thanh toán.');
       return;
     }
 
@@ -81,10 +89,7 @@ export default function CheckoutPage() {
         notes: notes.trim() || undefined,
       });
 
-      // Làm mới giỏ hàng sau khi checkout thành công
       await fetchCart();
-
-      // Chuyển hướng sang trang thành công
       router.push(`/order-success/${order.orderCode}`);
     } catch (err: unknown) {
       let msg = 'Đặt hàng không thành công. Vui lòng kiểm tra lại thông tin.';
@@ -112,12 +117,14 @@ export default function CheckoutPage() {
       <div className="checkout-page">
         <div className="container">
           <div className="cart-empty-container">
-            <div className="cart-empty-icon">🛒</div>
+            <div className="cart-empty-icon">
+              <IconShoppingBag size={36} />
+            </div>
             <h2 className="cart-empty-title">Giỏ Hàng Đang Trống</h2>
             <p className="cart-empty-desc">
-              Không có sản phẩm nào để tiến hành thanh toán. Vui lòng chọn mua thiết bị trước.
+              Không có thiết bị nào để tiến hành thanh toán. Vui lòng chọn sản phẩm trước.
             </p>
-            <Link href="/products" className="btn btn-primary btn-lg" style={{ marginTop: 'var(--space-2)' }}>
+            <Link href="/products" className="btn btn-primary btn-lg">
               Quay lại danh mục sản phẩm
             </Link>
           </div>
@@ -129,36 +136,33 @@ export default function CheckoutPage() {
   return (
     <div className="checkout-page">
       <div className="container">
-        {/* Header */}
         <div className="checkout-header">
           <h1 className="checkout-title">Tiến Hành Đặt Hàng</h1>
           <p className="checkout-subtitle">
-            Hoàn tất thông tin nhận hàng và phương thức thanh toán an toàn.
+            Xác nhận thông tin người nhận và lựa chọn phương thức thanh toán.
           </p>
         </div>
 
-        {/* Thông báo lỗi nếu có */}
         {errorMessage && (
-          <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+          <div className="alert alert-error" role="alert">
             <span>{errorMessage}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="checkout-layout">
-            {/* Cột trái: Form thông tin & Phương thức thanh toán */}
             <div className="checkout-main">
-              {/* Card 1: Thông tin người nhận */}
+              {/* Step 1: Shipping Info */}
               <div className="checkout-section-card">
                 <h2 className="checkout-section-title">
                   <span className="step-number">1</span>
-                  Thông Tin Giao Nhận Hàng
+                  <span>Thông Tin Giao Nhận Hàng</span>
                 </h2>
 
                 <div className="checkout-form-grid">
                   <div className="form-group">
                     <label className="form-label" htmlFor="recipientName">
-                      Họ và tên người nhận <span style={{ color: '#ff4d4f' }}>*</span>
+                      Họ và tên người nhận <span className="label-required">*</span>
                     </label>
                     <input
                       id="recipientName"
@@ -173,7 +177,7 @@ export default function CheckoutPage() {
 
                   <div className="form-group">
                     <label className="form-label" htmlFor="phone">
-                      Số điện thoại nhận hàng <span style={{ color: '#ff4d4f' }}>*</span>
+                      Số điện thoại nhận hàng <span className="label-required">*</span>
                     </label>
                     <input
                       id="phone"
@@ -188,7 +192,7 @@ export default function CheckoutPage() {
 
                   <div className="form-group full-width">
                     <label className="form-label" htmlFor="shippingAddress">
-                      Địa chỉ nhận hàng chi tiết <span style={{ color: '#ff4d4f' }}>*</span>
+                      Địa chỉ nhận hàng chi tiết <span className="label-required">*</span>
                     </label>
                     <input
                       id="shippingAddress"
@@ -203,12 +207,12 @@ export default function CheckoutPage() {
 
                   <div className="form-group full-width">
                     <label className="form-label" htmlFor="notes">
-                      Ghi chú đơn hàng (Tùy chọn)
+                      Ghi chú giao hàng <span className="label-optional">(Tùy chọn)</span>
                     </label>
                     <textarea
                       id="notes"
                       className="form-textarea"
-                      placeholder="Ghi chú thêm về thời gian giao hàng, chỉ dẫn địa chỉ..."
+                      placeholder="Ghi chú thêm về khung giờ nhận hàng hoặc hướng dẫn tòa nhà..."
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                     />
@@ -216,15 +220,14 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Card 2: Phương thức thanh toán */}
+              {/* Step 2: Payment Method */}
               <div className="checkout-section-card">
                 <h2 className="checkout-section-title">
                   <span className="step-number">2</span>
-                  Phương Thức Thanh Toán
+                  <span>Phương Thức Thanh Toán</span>
                 </h2>
 
                 <div className="payment-methods-grid">
-                  {/* COD */}
                   <label
                     className={`payment-method-card ${paymentMethod === 'COD' ? 'selected' : ''}`}
                   >
@@ -236,15 +239,14 @@ export default function CheckoutPage() {
                       onChange={() => setPaymentMethod('COD')}
                     />
                     <div className="payment-method-header">
-                      <span>💵</span>
+                      <IconCash size={18} />
                       <span>Thanh Toán Khi Nhận Hàng (COD)</span>
                     </div>
                     <p className="payment-method-desc">
-                      Kiểm tra thiết bị nguyên seal và thanh toán tiền mặt trực tiếp cho nhân viên giao vận.
+                      Đồng kiểm thiết bị nguyên niêm phong và thanh toán trực tiếp cho nhân viên giao vận.
                     </p>
                   </label>
 
-                  {/* Chuyển khoản ngân hàng */}
                   <label
                     className={`payment-method-card ${paymentMethod === 'BANK_TRANSFER' ? 'selected' : ''}`}
                   >
@@ -256,23 +258,21 @@ export default function CheckoutPage() {
                       onChange={() => setPaymentMethod('BANK_TRANSFER')}
                     />
                     <div className="payment-method-header">
-                      <span>🏦</span>
-                      <span>Chuyển Khoản Ngân Hàng (QR)</span>
+                      <IconBank size={18} />
+                      <span>Chuyển Khoản Ngân Hàng</span>
                     </div>
                     <p className="payment-method-desc">
-                      Chuyển khoản qua số tài khoản chính thức của SlyByte Shop kèm mã đơn hàng.
+                      Chuyển khoản đến tài khoản doanh nghiệp SlyByte Shop theo mã đơn hàng định danh.
                     </p>
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* Cột phải: Tóm tắt đơn hàng & Xác nhận */}
             <aside className="checkout-sidebar">
               <div className="cart-summary-card">
                 <h3 className="cart-summary-title">Kiểm Tra Đơn Hàng</h3>
 
-                {/* Danh sách sản phẩm mini */}
                 <div className="checkout-items-list">
                   {cart.items.map((item) => (
                     <div key={item.id} className="checkout-item-mini">
@@ -282,13 +282,13 @@ export default function CheckoutPage() {
                             <img
                               src={item.productThumbnail}
                               alt={item.productName}
-                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                              className="checkout-item-mini-img"
                             />
                           ) : (
-                            <span>💻</span>
+                            <IconLaptop size={20} />
                           )}
                         </div>
-                        <div style={{ overflow: 'hidden' }}>
+                        <div className="checkout-item-mini-meta">
                           <div className="checkout-item-mini-name" title={item.productName}>
                             {item.productName}
                           </div>
@@ -302,15 +302,14 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                {/* Tổng thanh toán */}
                 <div className="cart-summary-row">
                   <span>Tạm tính ({cart.totalItems} thiết bị):</span>
-                  <span>{formatPrice(cart.totalPrice)}</span>
+                  <span className="tabular-nums">{formatPrice(cart.totalPrice)}</span>
                 </div>
 
                 <div className="cart-summary-row">
                   <span>Phí vận chuyển:</span>
-                  <span style={{ color: '#52c41a', fontWeight: 600 }}>Miễn phí toàn quốc</span>
+                  <span className="text-success-strong">Miễn phí toàn quốc</span>
                 </div>
 
                 <div className="cart-summary-row total-row">
@@ -322,27 +321,24 @@ export default function CheckoutPage() {
                   type="submit"
                   className="btn btn-primary btn-block btn-lg"
                   disabled={isSubmitting}
-                  style={{ marginTop: 'var(--space-2)' }}
                 >
-                  {isSubmitting ? 'Đang xử lý đơn hàng...' : 'Xác Nhận Đặt Hàng →'}
+                  <span>{isSubmitting ? 'Đang xử lý đơn hàng...' : 'Xác Nhận Đặt Hàng'}</span>
+                  {!isSubmitting && <IconArrowRight size={16} />}
                 </button>
 
-                <Link
-                  href="/cart"
-                  className="btn btn-ghost btn-block btn-sm"
-                  style={{ textAlign: 'center' }}
-                >
-                  ← Quay lại chỉnh sửa giỏ hàng
+                <Link href="/cart" className="btn btn-ghost btn-block btn-sm">
+                  <IconArrowLeft size={14} />
+                  <span>Quay lại chỉnh sửa giỏ hàng</span>
                 </Link>
 
                 <div className="cart-summary-guarantee">
                   <div className="cart-summary-guarantee-item">
-                    <span>🔒</span>
-                    <span>Bảo mật giao dịch mã hóa tiêu chuẩn SSL</span>
+                    <IconLock size={15} />
+                    <span>Bảo mật giao dịch mã hóa tiêu chuẩn TLS</span>
                   </div>
                   <div className="cart-summary-guarantee-item">
-                    <span>⚡</span>
-                    <span>Đóng gói chống sốc chuyên dụng cho đồ công nghệ</span>
+                    <IconBolt size={15} />
+                    <span>Đóng gói chống sốc chuyên dụng cho phần cứng</span>
                   </div>
                 </div>
               </div>
@@ -353,4 +349,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

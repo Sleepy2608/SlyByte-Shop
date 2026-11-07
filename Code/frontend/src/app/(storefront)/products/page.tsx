@@ -8,12 +8,12 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { ProductFilter } from '@/components/product/ProductFilter';
 import { ProductSort } from '@/components/product/ProductSort';
 import { ProductSkeleton } from '@/components/product/ProductSkeleton';
+import { IconSearch, IconArrowLeft, IconArrowRight } from '@/components/ui/Icons';
 
 function ProductsCatalogContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // URL Query Params
   const categoryParam = searchParams.get('category');
   const brandParam = searchParams.get('brand');
   const minPriceParam = searchParams.get('minPrice');
@@ -22,7 +22,6 @@ function ProductsCatalogContent() {
   const pageParam = searchParams.get('page');
   const sortParam = searchParams.get('sort');
 
-  // State
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [products, setProducts] = useState<ProductSummary[]>([]);
@@ -32,14 +31,12 @@ function ProductsCatalogContent() {
   const [currentPage, setCurrentPage] = useState(pageParam ? Number(pageParam) : 0);
   const [searchInput, setSearchInput] = useState(keywordParam || '');
 
-  // Active Filter state
   const selectedCategoryId = categoryParam ? Number(categoryParam) : undefined;
   const selectedBrandId = brandParam ? Number(brandParam) : undefined;
   const selectedMinPrice = minPriceParam ? Number(minPriceParam) : undefined;
   const selectedMaxPrice = maxPriceParam ? Number(maxPriceParam) : undefined;
   const currentSort = sortParam || 'newest';
 
-  // 1. Tải danh sách Danh mục và Thương hiệu ban đầu
   useEffect(() => {
     async function loadMetadata() {
       try {
@@ -56,7 +53,6 @@ function ProductsCatalogContent() {
     loadMetadata();
   }, []);
 
-  // 2. Hàm cập nhật URL query params
   const updateUrlParams = useCallback(
     (newParams: Record<string, string | number | undefined>) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -74,7 +70,6 @@ function ProductsCatalogContent() {
     [router, searchParams]
   );
 
-  // 3. Tải danh sách sản phẩm theo query params
   useEffect(() => {
     let isCancelled = false;
 
@@ -119,7 +114,6 @@ function ProductsCatalogContent() {
     };
   }, [categoryParam, brandParam, minPriceParam, maxPriceParam, keywordParam, pageParam, sortParam]);
 
-  // Handlers
   const handleCategoryChange = (catId?: number) => {
     updateUrlParams({ category: catId, page: 0 });
   };
@@ -154,16 +148,16 @@ function ProductsCatalogContent() {
   return (
     <div className="catalog-page">
       <div className="container">
-        {/* Header Catalog */}
         <div className="catalog-header">
           <h1 className="catalog-title">Kho Thiết Bị Công Nghệ</h1>
           <p className="catalog-subtitle">
-            Khám phá các cấu hình phần cứng tuyển chọn chính hãng với tiêu chuẩn kỹ thuật hàng đầu.
+            Tra cứu và lọc cấu hình phần cứng chính hãng theo danh mục, thương hiệu và phân khúc ngân sách.
           </p>
 
-          {/* Search bar */}
           <form onSubmit={handleSearchSubmit} className="catalog-search-container">
-            <span className="catalog-search-icon">🔍</span>
+            <span className="catalog-search-icon">
+              <IconSearch size={16} />
+            </span>
             <input
               type="text"
               placeholder="Tìm theo tên máy, chip xử lý, card đồ họa..."
@@ -174,9 +168,7 @@ function ProductsCatalogContent() {
           </form>
         </div>
 
-        {/* Layout 2 cột: Sidebar lọc + Lưới sản phẩm */}
         <div className="catalog-layout">
-          {/* Cột trái: Bộ lọc */}
           <ProductFilter
             categories={categories}
             brands={brands}
@@ -190,7 +182,6 @@ function ProductsCatalogContent() {
             onReset={handleResetFilters}
           />
 
-          {/* Cột phải: Sort bar + Lưới sản phẩm */}
           <div className="catalog-products-col">
             <ProductSort
               totalItems={totalElements}
@@ -208,7 +199,6 @@ function ProductsCatalogContent() {
                   ))}
                 </div>
 
-                {/* Phân trang */}
                 {totalPages > 1 && (
                   <div className="pagination-wrapper">
                     <button
@@ -217,7 +207,8 @@ function ProductsCatalogContent() {
                       disabled={currentPage <= 0}
                       onClick={() => handlePageChange(currentPage - 1)}
                     >
-                      ← Trang trước
+                      <IconArrowLeft size={14} />
+                      <span>Trang trước</span>
                     </button>
 
                     {Array.from({ length: totalPages }).map((_, idx) => (
@@ -237,24 +228,27 @@ function ProductsCatalogContent() {
                       disabled={currentPage >= totalPages - 1}
                       onClick={() => handlePageChange(currentPage + 1)}
                     >
-                      Trang sau →
+                      <span>Trang sau</span>
+                      <IconArrowRight size={14} />
                     </button>
                   </div>
                 )}
               </>
             ) : (
               <div className="catalog-empty-state">
-                <span className="catalog-empty-icon">🔎</span>
+                <span className="catalog-empty-icon">
+                  <IconSearch size={36} />
+                </span>
                 <h3 className="catalog-empty-title">Không tìm thấy thiết bị phù hợp</h3>
                 <p className="catalog-empty-desc">
-                  Thử thay đổi mức giá, thương hiệu hoặc tìm kiếm bằng từ khóa thông số khác.
+                  Thử thay đổi khoảng giá, thương hiệu hoặc tìm kiếm bằng từ khóa cấu hình khác.
                 </p>
                 <button
                   type="button"
                   className="btn btn-primary btn-sm"
                   onClick={handleResetFilters}
                 >
-                  Xóa bộ lọc & Xem tất cả
+                  Đặt lại bộ lọc
                 </button>
               </div>
             )}
@@ -267,9 +261,8 @@ function ProductsCatalogContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="container" style={{ padding: '40px 0' }}><ProductSkeleton count={6} /></div>}>
+    <Suspense fallback={<div className="container section"><ProductSkeleton count={6} /></div>}>
       <ProductsCatalogContent />
     </Suspense>
   );
 }
-

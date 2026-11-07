@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { adminService } from '@/services/adminService';
 import { OrderDetail, OrderStatus } from '@/types/order.types';
+import { IconX, IconArrowLeft, IconArrowRight } from '@/components/ui/Icons';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<OrderDetail[]>([]);
@@ -10,8 +11,8 @@ export default function AdminOrdersPage() {
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
 
-  // Modal đổi trạng thái
   const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
   const [newStatus, setNewStatus] = useState<OrderStatus>('PENDING');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -36,6 +37,7 @@ export default function AdminOrdersPage() {
   }, [filterStatus, fetchOrders]);
 
   const handleOpenStatusModal = (order: OrderDetail) => {
+    setFeedbackError(null);
     setSelectedOrder(order);
     setNewStatus(order.orderStatus);
   };
@@ -43,12 +45,13 @@ export default function AdminOrdersPage() {
   const handleSaveStatus = async () => {
     if (!selectedOrder) return;
     setIsUpdating(true);
+    setFeedbackError(null);
     try {
       await adminService.updateOrderStatus(selectedOrder.id, newStatus);
       setSelectedOrder(null);
       await fetchOrders(page, filterStatus);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái đơn hàng.');
+      setFeedbackError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái đơn hàng.');
     } finally {
       setIsUpdating(false);
     }
@@ -80,13 +83,22 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
+      {feedbackError && (
+        <div className="alert alert-error" role="alert">
+          <span>{feedbackError}</span>
+        </div>
+      )}
+
       <div className="admin-table-card">
         <div className="admin-table-toolbar">
           <h2 className="admin-table-title">Danh Sách Đơn Hàng Hệ Thống</h2>
 
           <div className="admin-table-filters">
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Lọc trạng thái:</span>
+            <label htmlFor="admin-order-status-filter" className="text-muted-sm">
+              Lọc trạng thái:
+            </label>
             <select
+              id="admin-order-status-filter"
               className="admin-select"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -117,13 +129,13 @@ export default function AdminOrdersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px' }}>
+                  <td colSpan={7} className="admin-table-empty">
                     Đang nạp dữ liệu đơn hàng...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} className="admin-table-empty">
                     Không có đơn hàng nào khớp với điều kiện lọc.
                   </td>
                 </tr>
@@ -131,31 +143,29 @@ export default function AdminOrdersPage() {
                 orders.map((order) => (
                   <tr key={order.id}>
                     <td>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--color-primary)' }}>
-                        {order.orderCode}
-                      </span>
+                      <span className="mono-code">{order.orderCode}</span>
                     </td>
                     <td>
-                      <div><strong>{order.recipientName}</strong></div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{order.phone}</div>
+                      <div className="text-strong">{order.recipientName}</div>
+                      <div className="text-muted-sm tabular-nums">{order.phone}</div>
                     </td>
-                    <td style={{ maxWidth: '240px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <td className="admin-cell-address">
                       {order.shippingAddress}
                     </td>
                     <td>
-                      <div style={{ fontSize: '0.85rem' }}>
+                      <div className="admin-order-items-cell">
                         {order.items && order.items.length > 0 ? (
                           order.items.map((it) => (
-                            <div key={it.id} style={{ whiteSpace: 'nowrap' }}>
-                              • {it.productName} (x{it.quantity})
+                            <div key={it.id} className="admin-order-item-line">
+                              {it.productName} <span className="text-muted-sm">(x{it.quantity})</span>
                             </div>
                           ))
                         ) : (
-                          <span style={{ color: 'var(--text-muted)' }}>Chi tiết trong đơn</span>
+                          <span className="text-muted-sm">Chi tiết trong đơn</span>
                         )}
                       </div>
                     </td>
-                    <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    <td className="text-strong tabular-nums">
                       {formatPrice(order.totalAmount)}
                     </td>
                     <td>{renderStatusBadge(order.orderStatus)}</td>
@@ -163,7 +173,6 @@ export default function AdminOrdersPage() {
                       <button
                         type="button"
                         className="btn btn-outline btn-sm"
-                        style={{ padding: '6px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                         onClick={() => handleOpenStatusModal(order)}
                       >
                         Đổi trạng thái
@@ -176,33 +185,33 @@ export default function AdminOrdersPage() {
           </table>
         </div>
 
-        {/* Phân trang */}
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', padding: '16px' }}>
+          <div className="admin-pagination-bar">
             <button
               type="button"
-              className="btn btn-outline btn-sm"
+              className="pagination-btn"
               disabled={page <= 0}
               onClick={() => fetchOrders(page - 1)}
             >
-              &larr; Trang trước
+              <IconArrowLeft size={14} />
+              <span>Trang trước</span>
             </button>
-            <span style={{ alignSelf: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <span className="pagination-status-text">
               Trang {page + 1} / {totalPages}
             </span>
             <button
               type="button"
-              className="btn btn-outline btn-sm"
+              className="pagination-btn"
               disabled={page >= totalPages - 1}
               onClick={() => fetchOrders(page + 1)}
             >
-              Trang sau &rarr;
+              <span>Trang sau</span>
+              <IconArrowRight size={14} />
             </button>
           </div>
         )}
       </div>
 
-      {/* Modal Cập Nhật Trạng Thái */}
       {selectedOrder && (
         <div className="admin-modal-backdrop" onClick={() => setSelectedOrder(null)}>
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
@@ -212,26 +221,28 @@ export default function AdminOrdersPage() {
                 type="button"
                 className="admin-modal-close"
                 onClick={() => setSelectedOrder(null)}
+                aria-label="Đóng hộp thoại"
               >
-                ✕
+                <IconX size={18} />
               </button>
             </div>
 
             <div className="admin-modal-body">
-              <div>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Mã đơn: </span>
-                <strong style={{ fontFamily: 'monospace', color: 'var(--color-primary)' }}>
-                  {selectedOrder.orderCode}
-                </strong>
+              <div className="admin-modal-meta-row">
+                <span className="text-muted-sm">Mã đơn: </span>
+                <strong className="mono-code">{selectedOrder.orderCode}</strong>
               </div>
-              <div>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Người nhận: </span>
+              <div className="admin-modal-meta-row">
+                <span className="text-muted-sm">Người nhận: </span>
                 <span>{selectedOrder.recipientName} ({selectedOrder.phone})</span>
               </div>
 
-              <div className="form-group" style={{ marginTop: '12px' }}>
-                <label className="form-label">Chọn trạng thái xử lý mới:</label>
+              <div className="form-group">
+                <label htmlFor="modal-status-select" className="form-label">
+                  Chọn trạng thái xử lý mới:
+                </label>
                 <select
+                  id="modal-status-select"
                   className="form-input"
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as OrderStatus)}
@@ -244,8 +255,8 @@ export default function AdminOrdersPage() {
                 </select>
               </div>
 
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-                * Việc chuyển trạng thái sang <strong>DELIVERED</strong> xác nhận giao dịch thành công. Trạng thái <strong>CANCELLED</strong> sẽ hoàn trả lại tồn kho nếu đơn chưa giao.
+              <p className="text-muted-sm">
+                Việc chuyển trạng thái sang <strong>DELIVERED</strong> xác nhận giao dịch hoàn tất. Trạng thái <strong>CANCELLED</strong> sẽ hoàn trả lại tồn kho nếu đơn chưa giao.
               </p>
             </div>
 
@@ -272,4 +283,3 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
-

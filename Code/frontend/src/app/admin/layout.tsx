@@ -4,6 +4,15 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import {
+  IconChart,
+  IconPackage,
+  IconLaptop,
+  IconStore,
+  IconLogOut,
+  IconAlertOctagon,
+  IconArrowLeft,
+} from '@/components/ui/Icons';
 
 export default function AdminLayout({
   children,
@@ -15,7 +24,6 @@ export default function AdminLayout({
   const { user, isAuthenticated, logout } = useAuthStore();
 
   useEffect(() => {
-    // Nếu chưa đăng nhập -> chuyển hướng sang /login
     if (!isAuthenticated) {
       router.push('/login?from=/admin');
     }
@@ -26,37 +34,22 @@ export default function AdminLayout({
     router.push('/login');
   };
 
-  // Nếu đã đăng nhập nhưng không có role ADMIN -> Chặn quyền truy cập
   if (isAuthenticated && user && user.role !== 'ADMIN') {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg-page)',
-        padding: '24px',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: '16px',
-          padding: '40px 32px',
-          maxWidth: '480px'
-        }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🚫</div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ff4d4f', marginBottom: '12px' }}>
-            Truy Cập Bị Từ Chối (403)
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.5 }}>
-            Tài khoản của bạn (<strong>{user.email}</strong>) chỉ có quyền <strong>{user.role}</strong>, không đủ thẩm quyền để truy cập Phân hệ Quản trị (Admin Portal).
+      <div className="admin-forbidden-page">
+        <div className="admin-forbidden-card">
+          <div className="admin-forbidden-icon">
+            <IconAlertOctagon size={36} />
+          </div>
+          <h1 className="admin-forbidden-title">Truy Cập Bị Từ Chối (403)</h1>
+          <p className="admin-forbidden-desc">
+            Tài khoản của bạn (<strong>{user.email}</strong>) chỉ có quyền <strong>{user.role}</strong>, không đủ thẩm quyền để truy cập Phân hệ Quản trị.
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <div className="empty-state-actions">
             <Link href="/" className="btn btn-primary">
               Về Trang Cửa Hàng
             </Link>
-            <button onClick={handleLogout} className="btn btn-outline">
+            <button type="button" onClick={handleLogout} className="btn btn-outline">
               Đăng Xuất
             </button>
           </div>
@@ -67,14 +60,14 @@ export default function AdminLayout({
 
   if (!isAuthenticated || !user) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--text-secondary)' }}>Đang kiểm tra quyền quản trị viên...</p>
+      <div className="admin-forbidden-page">
+        <p className="catalog-empty-desc">Đang kiểm tra quyền quản trị viên...</p>
       </div>
     );
   }
 
   const getPageTitle = () => {
-    if (pathname === '/admin') return 'Bảng Điều Khiển Tổng Quan (Dashboard)';
+    if (pathname === '/admin') return 'Bảng Điều Khiển Tổng Quan';
     if (pathname === '/admin/orders') return 'Quản Lý Đơn Hàng Hệ Thống';
     if (pathname === '/admin/products') return 'Quản Lý Danh Mục & Thiết Bị Công Nghệ';
     return 'Phân Hệ Quản Trị Hệ Thống';
@@ -82,24 +75,25 @@ export default function AdminLayout({
 
   return (
     <div className="admin-layout">
-      {/* Sidebar Trái */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-brand">
-          <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-            <span className="brand-dot" />
-            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>
-              SLYBYTE <span style={{ color: 'var(--color-primary)' }}>ADMIN</span>
+          <Link href="/admin" className="navbar-brand">
+            <span className="brand-mark" aria-hidden="true" />
+            <span className="brand-name">
+              SLYBYTE<span className="brand-accent"> ADMIN</span>
             </span>
           </Link>
-          <span className="badge-status status-cancelled" style={{ fontSize: '0.7rem' }}>PORTAL</span>
+          <span className="role-tag">PORTAL</span>
         </div>
 
-        <nav className="admin-sidebar-nav">
+        <nav className="admin-sidebar-nav" aria-label="Điều hướng quản trị">
           <Link
             href="/admin"
             className={`admin-nav-item ${pathname === '/admin' ? 'active' : ''}`}
           >
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon">
+              <IconChart size={18} />
+            </span>
             <span>Tổng Quan (Dashboard)</span>
           </Link>
 
@@ -107,7 +101,9 @@ export default function AdminLayout({
             href="/admin/orders"
             className={`admin-nav-item ${pathname === '/admin/orders' ? 'active' : ''}`}
           >
-            <span className="nav-icon">📦</span>
+            <span className="nav-icon">
+              <IconPackage size={18} />
+            </span>
             <span>Quản Lý Đơn Hàng</span>
           </Link>
 
@@ -115,64 +111,52 @@ export default function AdminLayout({
             href="/admin/products"
             className={`admin-nav-item ${pathname === '/admin/products' ? 'active' : ''}`}
           >
-            <span className="nav-icon">💻</span>
-            <span>Sản Phẩm & Kho Hàng</span>
+            <span className="nav-icon">
+              <IconLaptop size={18} />
+            </span>
+            <span>Sản Phẩm &amp; Kho Hàng</span>
           </Link>
 
-          <div style={{ margin: '16px 0 8px 12px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            Hệ Thống
-          </div>
+          <div className="admin-nav-section-label">Hệ Thống</div>
 
           <Link href="/" className="admin-nav-item">
-            <span className="nav-icon">🏪</span>
-            <span>Xem Giao Diện Khách</span>
+            <span className="nav-icon">
+              <IconStore size={18} />
+            </span>
+            <span>Giao Diện Cửa Hàng</span>
           </Link>
         </nav>
 
         <div className="admin-sidebar-footer">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'var(--color-primary)',
-              color: '#000',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              A
+          <div className="admin-user-summary">
+            <div className="admin-user-avatar">
+              {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'A'}
             </div>
-            <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user.fullName || 'Admin'}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ROLE_ADMIN</div>
+            <div className="admin-user-meta">
+              <div className="admin-user-name">{user.fullName || 'Admin'}</div>
+              <div className="admin-user-role">ROLE_ADMIN</div>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={handleLogout}
-            className="btn btn-ghost btn-sm"
-            style={{ padding: '6px 8px', color: '#ff4d4f' }}
+            className="btn btn-ghost btn-sm btn-danger-ghost"
             title="Đăng xuất quản trị"
+            aria-label="Đăng xuất quản trị"
           >
-            🚪
+            <IconLogOut size={16} />
           </button>
         </div>
       </aside>
 
-      {/* Main Content Phải */}
       <div className="admin-main">
         <header className="admin-topbar">
           <h1 className="admin-topbar-title">{getPageTitle()}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Link href="/" className="btn btn-outline btn-sm">
-              &larr; Cửa hàng
-            </Link>
-          </div>
+          <Link href="/" className="btn btn-outline btn-sm">
+            <IconArrowLeft size={14} />
+            <span>Cửa hàng</span>
+          </Link>
         </header>
 
         <main className="admin-content">
@@ -182,4 +166,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
