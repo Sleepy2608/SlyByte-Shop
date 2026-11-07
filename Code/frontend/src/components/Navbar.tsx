@@ -60,6 +60,9 @@ export const Navbar: React.FC = () => {
                 <span className="user-name">{user.fullName || user.email}</span>
                 {user.role === 'ADMIN' && <span className="role-tag">ADMIN</span>}
               </div>
+              <Link href="/orders" className="btn btn-ghost btn-sm" title="Lịch sử đơn hàng">
+                Đơn hàng
+              </Link>
               <button onClick={handleLogout} className="btn btn-ghost btn-sm" title="Đăng xuất">
                 Đăng xuất
               </button>
