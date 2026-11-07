@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { IconCheck } from '@/components/ui/Icons';
 
 interface AuthLayoutProps {
   title: string;
@@ -14,46 +15,54 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, childre
         {/* Left Side: Brand Showcase */}
         <div className="auth-showcase">
           <Link href="/" className="showcase-brand">
-            <span className="brand-dot"></span>
-            <span className="brand-name">SLYBYTE<span className="brand-accent"> SHOP</span></span>
+            <span className="brand-mark" aria-hidden="true" />
+            <span className="brand-name">
+              SLYBYTE<span className="brand-accent"> SHOP</span>
+            </span>
           </Link>
 
           <div className="showcase-content">
-            <div className="showcase-tag">Nền Tảng Công Nghệ Cao Cấp</div>
+            <div className="showcase-tag">Hệ Sinh Thái Phần Cứng</div>
             <h2 className="showcase-title">
-              Trải nghiệm thiết bị đỉnh cao với chất lượng chính hãng.
+              Thiết bị công nghệ chuẩn xác cho hiệu suất chuyên nghiệp.
             </h2>
             <p className="showcase-desc">
-              Khám phá hệ sinh thái Laptop, Smartphone và phần cứng thế hệ mới với thông số kỹ thuật minh bạch và dịch vụ bảo hành tiêu chuẩn.
+              Truy cập hệ thống phân phối Laptop Workstation, Gaming Pro và Smartphone Flagship với hồ sơ kỹ thuật minh bạch cùng chính sách bảo hành chính hãng.
             </p>
 
             <div className="showcase-features">
               <div className="showcase-feature-item">
-                <div className="feature-icon-box">✓</div>
+                <div className="feature-icon-box">
+                  <IconCheck size={13} />
+                </div>
                 <div>
-                  <strong>Sản phẩm chính hãng 100%</strong>
-                  <span>Phân phối từ Apple, Asus, Dell, Samsung</span>
+                  <strong>Phần cứng nguyên bản 100%</strong>
+                  <span>Phân phối chính thức từ Apple, Asus, Dell, Samsung</span>
                 </div>
               </div>
               <div className="showcase-feature-item">
-                <div className="feature-icon-box">✓</div>
+                <div className="feature-icon-box">
+                  <IconCheck size={13} />
+                </div>
                 <div>
-                  <strong>Thông số kỹ thuật chuẩn hóa</strong>
-                  <span>Minh bạch cấu hình CPU, GPU, RAM, Storage</span>
+                  <strong>Thông số kỹ thuật minh bạch</strong>
+                  <span>Chuẩn hóa cấu hình CPU, GPU, RAM và băng thông lưu trữ</span>
                 </div>
               </div>
               <div className="showcase-feature-item">
-                <div className="feature-icon-box">✓</div>
+                <div className="feature-icon-box">
+                  <IconCheck size={13} />
+                </div>
                 <div>
-                  <strong>Bảo mật tài khoản & Đơn hàng</strong>
-                  <span>Xác thực JWT hiện đại, bảo mật đa tầng</span>
+                  <strong>Bảo mật phiên giao dịch</strong>
+                  <span>Xác thực JWT và đồng bộ giỏ hàng theo tài khoản</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="showcase-footer">
-            <span>© {new Date().getFullYear()} Slybyte Shop (Slybyte). All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Slybyte Shop. All rights reserved.</span>
           </div>
         </div>
 
@@ -62,8 +71,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, childre
           <div className="auth-form-card">
             <div className="auth-form-header">
               <Link href="/" className="mobile-brand">
-                <span className="brand-dot"></span>
-                <span>SLYBYTE<span className="brand-accent"> SHOP</span></span>
+                <span className="brand-mark" aria-hidden="true" />
+                <span>
+                  SLYBYTE<span className="brand-accent"> SHOP</span>
+                </span>
               </Link>
               <h1 className="auth-title">{title}</h1>
               <p className="auth-subtitle">{subtitle}</p>

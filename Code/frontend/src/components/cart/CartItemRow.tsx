@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { CartItem } from '@/types/cart.types';
 import { useCartStore } from '@/store/useCartStore';
+import { IconLaptop, IconTrash } from '@/components/ui/Icons';
 
 interface CartItemRowProps {
   item: CartItem;
@@ -22,13 +23,11 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
   const handleDecrease = async () => {
     if (item.quantity <= 1) {
-      if (confirm(`Bạn có chắc chắn muốn xóa "${item.productName}" khỏi giỏ hàng?`)) {
-        setIsUpdating(true);
-        try {
-          await removeItem(item.id);
-        } finally {
-          setIsUpdating(false);
-        }
+      setIsUpdating(true);
+      try {
+        await removeItem(item.id);
+      } finally {
+        setIsUpdating(false);
       }
       return;
     }
@@ -42,7 +41,6 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
   const handleIncrease = async () => {
     if (item.quantity >= item.stockQuantity) {
-      alert(`Sản phẩm này chỉ còn tối đa ${item.stockQuantity} thiết bị trong kho.`);
       return;
     }
     setIsUpdating(true);
@@ -54,19 +52,16 @@ export function CartItemRow({ item }: CartItemRowProps) {
   };
 
   const handleRemove = async () => {
-    if (confirm(`Xóa "${item.productName}" khỏi giỏ hàng?`)) {
-      setIsUpdating(true);
-      try {
-        await removeItem(item.id);
-      } finally {
-        setIsUpdating(false);
-      }
+    setIsUpdating(true);
+    try {
+      await removeItem(item.id);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   return (
     <div className="cart-item-row">
-      {/* Cột 1: Thông tin sản phẩm */}
       <div className="cart-item-info">
         <div className="cart-item-thumb">
           {item.productThumbnail ? (
@@ -77,7 +72,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
               loading="lazy"
             />
           ) : (
-            <span style={{ fontSize: '1.8rem' }}>💻</span>
+            <IconLaptop size={24} />
           )}
         </div>
         <div className="cart-item-details">
@@ -91,17 +86,15 @@ export function CartItemRow({ item }: CartItemRowProps) {
             {item.productName}
           </Link>
           <span className="cart-item-stock-hint">
-            Kho: {item.stockQuantity} sản phẩm sẵn có
+            Tồn kho: {item.stockQuantity} thiết bị
           </span>
         </div>
       </div>
 
-      {/* Cột 2: Đơn giá */}
       <div className="cart-item-price-unit">
         {formatPrice(item.price)}
       </div>
 
-      {/* Cột 3: Bộ tăng/giảm số lượng */}
       <div className="cart-item-stepper-col">
         <div className="quantity-stepper">
           <button
@@ -110,6 +103,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             onClick={handleDecrease}
             disabled={isUpdating}
             title="Giảm số lượng"
+            aria-label="Giảm số lượng"
           >
             -
           </button>
@@ -120,30 +114,29 @@ export function CartItemRow({ item }: CartItemRowProps) {
             onClick={handleIncrease}
             disabled={isUpdating || item.quantity >= item.stockQuantity}
             title="Tăng số lượng"
+            aria-label="Tăng số lượng"
           >
             +
           </button>
         </div>
       </div>
 
-      {/* Cột 4: Thành tiền (subtotal) */}
       <div className="cart-item-subtotal">
         {formatPrice(item.subtotal)}
       </div>
 
-      {/* Cột 5: Nút xóa */}
       <div className="cart-item-action-col">
         <button
           type="button"
           className="cart-item-remove-btn"
           onClick={handleRemove}
           disabled={isUpdating}
-          title="Xóa sản phẩm này"
+          title="Xóa sản phẩm khỏi giỏ"
+          aria-label="Xóa sản phẩm khỏi giỏ"
         >
-          ✕
+          <IconTrash size={16} />
         </button>
       </div>
     </div>
   );
 }
-

@@ -2,6 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
+import {
+  IconShieldCheck,
+  IconBolt,
+  IconRefresh,
+  IconArrowRight,
+  IconArrowLeft,
+} from '@/components/ui/Icons';
 
 interface CartSummaryProps {
   totalItems: number;
@@ -23,17 +30,17 @@ export function CartSummary({ totalItems, totalPrice }: CartSummaryProps) {
 
       <div className="cart-summary-row">
         <span>Tổng số lượng:</span>
-        <strong style={{ color: 'var(--text-primary)' }}>{totalItems} thiết bị</strong>
+        <strong className="text-strong">{totalItems} thiết bị</strong>
       </div>
 
       <div className="cart-summary-row">
         <span>Tạm tính:</span>
-        <span>{formatPrice(totalPrice)}</span>
+        <span className="tabular-nums">{formatPrice(totalPrice)}</span>
       </div>
 
       <div className="cart-summary-row">
         <span>Phí vận chuyển:</span>
-        <span style={{ color: '#52c41a', fontWeight: 600 }}>Miễn phí (Toàn quốc)</span>
+        <span className="text-success-strong">Miễn phí toàn quốc</span>
       </div>
 
       <div className="cart-summary-row total-row">
@@ -41,36 +48,30 @@ export function CartSummary({ totalItems, totalPrice }: CartSummaryProps) {
         <span className="cart-summary-total-price">{formatPrice(totalPrice)}</span>
       </div>
 
-      <Link
-        href="/checkout"
-        className="btn btn-primary btn-block btn-lg"
-        style={{ marginTop: 'var(--space-2)' }}
-      >
-        Tiến Hành Đặt Hàng &rarr;
+      <Link href="/checkout" className="btn btn-primary btn-block btn-lg">
+        <span>Tiến Hành Đặt Hàng</span>
+        <IconArrowRight size={16} />
       </Link>
 
-      <Link
-        href="/products"
-        className="btn btn-outline btn-block btn-sm"
-      >
-        &larr; Tiếp tục chọn thêm sản phẩm
+      <Link href="/products" className="btn btn-outline btn-block btn-sm">
+        <IconArrowLeft size={14} />
+        <span>Tiếp tục chọn thiết bị</span>
       </Link>
 
       <div className="cart-summary-guarantee">
         <div className="cart-summary-guarantee-item">
-          <span>🛡️</span>
+          <IconShieldCheck size={15} />
           <span>Cam kết 100% phần cứng chính hãng</span>
         </div>
         <div className="cart-summary-guarantee-item">
-          <span>⚡</span>
+          <IconBolt size={15} />
           <span>Bảo hành 24 tháng theo tiêu chuẩn nhà sản xuất</span>
         </div>
         <div className="cart-summary-guarantee-item">
-          <span>🔄</span>
-          <span>Đổi trả 1-đổi-1 trong 30 ngày nếu phát sinh lỗi</span>
+          <IconRefresh size={15} />
+          <span>Đổi mới 1-đổi-1 trong 30 ngày nếu phát sinh lỗi</span>
         </div>
       </div>
     </aside>
   );
 }
-
