@@ -72,7 +72,7 @@ application-local.yml
 # Graphify Knowledge Graph
 # ===============================
 # Local environment paths, cache, and temporary/internal files
-.graphify/
+graphify-out/
 
 # Next.js build output
 .next/
