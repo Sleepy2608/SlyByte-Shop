@@ -3,18 +3,40 @@
 import React from 'react';
 import Link from 'next/link';
 import { ProductSummary } from '@/types/product.types';
-import { IconLaptop } from '@/components/ui/Icons';
+import { IconLaptop, IconHeart } from '@/components/ui/Icons';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
   product: ProductSummary;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+  const { isInWishlist, toggleWishlist } = useWishlistStore();
+  const isLiked = isInWishlist(product.id);
+
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
     }).format(value);
+  };
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    try {
+      await toggleWishlist(product.id);
+    } catch {
+      // Ignored on fail
+    }
   };
 
   const hasDiscount = product.discountPercentage > 0 && product.originalPrice > product.salePrice;
@@ -29,6 +51,16 @@ export function ProductCard({ product }: ProductCardProps) {
         {product.brandName && (
           <span className="product-brand-tag">{product.brandName}</span>
         )}
+
+        <button
+          type="button"
+          className={`product-card-wishlist-btn ${isLiked ? 'active' : ''}`}
+          onClick={handleWishlistToggle}
+          title={isLiked ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+          aria-label={isLiked ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+        >
+          <IconHeart size={16} filled={isLiked} />
+        </button>
 
         <Link href={`/products/${product.slug || product.id}`} className="product-thumb-link">
           {product.thumbnail ? (

@@ -8,9 +8,11 @@ import { ProductDetail, ProductSummary } from '@/types/product.types';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductSpecsTable } from '@/components/product/ProductSpecsTable';
 import { ProductCard } from '@/components/product/ProductCard';
+import { ProductReviews } from '@/components/product/ProductReviews';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { IconShoppingBag, IconCheck } from '@/components/ui/Icons';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import { IconShoppingBag, IconCheck, IconHeart } from '@/components/ui/Icons';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -19,6 +21,7 @@ export default function ProductDetailPage() {
 
   const { addItem, isLoading: isCartLoading } = useCartStore();
   const { isAuthenticated } = useAuthStore();
+  const { isInWishlist, toggleWishlist } = useWishlistStore();
 
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ProductSummary[]>([]);
@@ -26,6 +29,21 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [addedNotice, setAddedNotice] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const isLiked = product ? isInWishlist(product.id) : false;
+
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    try {
+      await toggleWishlist(product.id);
+    } catch {
+      setActionError('Không thể cập nhật danh sách yêu thích.');
+    }
+  };
 
   useEffect(() => {
     if (!idOrSlug) return;
@@ -238,6 +256,15 @@ export default function ProductDetailPage() {
               >
                 Mua ngay
               </button>
+              <button
+                type="button"
+                className={`btn btn-outline btn-wishlist-toggle ${isLiked ? 'active' : ''}`}
+                onClick={handleToggleWishlist}
+                title={isLiked ? 'Xóa khỏi yêu thích' : 'Lưu vào yêu thích'}
+                aria-label={isLiked ? 'Xóa khỏi yêu thích' : 'Lưu vào yêu thích'}
+              >
+                <IconHeart size={18} filled={isLiked} />
+              </button>
             </div>
 
             {addedNotice && (
@@ -256,6 +283,8 @@ export default function ProductDetailPage() {
         </div>
 
         <ProductSpecsTable specs={product.specs || []} />
+
+        <ProductReviews productId={product.id} />
 
         {relatedProducts.length > 0 && (
           <section className="related-section">
