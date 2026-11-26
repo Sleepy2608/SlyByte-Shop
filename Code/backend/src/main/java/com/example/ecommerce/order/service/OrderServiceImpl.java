@@ -211,7 +211,8 @@ public class OrderServiceImpl implements OrderService {
         return mapToOrderDetailResponse(updatedOrder);
     }
 
-    private OrderDetailResponse mapToOrderDetailResponse(Order order) {
+    @Override
+    public OrderDetailResponse mapToOrderDetailResponse(Order order) {
         List<OrderItemResponse> itemResponses = order.getItems() != null
                 ? order.getItems().stream().map(item -> OrderItemResponse.builder()
                         .id(item.getId())

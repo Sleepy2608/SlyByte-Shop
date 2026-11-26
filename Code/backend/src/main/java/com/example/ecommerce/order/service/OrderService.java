@@ -26,5 +26,10 @@ public interface OrderService {
      * Hủy đơn hàng (nếu đang ở trạng thái PENDING) và hoàn trả tồn kho
      */
     OrderDetailResponse cancelOrder(Long userId, String orderCode);
+
+    /**
+     * Chuyển đổi đối tượng Order sang OrderDetailResponse
+     */
+    OrderDetailResponse mapToOrderDetailResponse(com.example.ecommerce.order.entity.Order order);
 }
 

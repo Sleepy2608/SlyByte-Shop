@@ -5,25 +5,30 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
-import { IconShoppingBag } from '@/components/ui/Icons';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import { IconShoppingBag, IconHeart } from '@/components/ui/Icons';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { totalItems, fetchCart, reset: resetCart } = useCartStore();
+  const { totalItems: wishlistTotal, fetchWishlist, clearWishlist } = useWishlistStore();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
+      fetchWishlist();
     } else {
       resetCart();
+      clearWishlist();
     }
-  }, [isAuthenticated, fetchCart, resetCart]);
+  }, [isAuthenticated, fetchCart, resetCart, fetchWishlist, clearWishlist]);
 
   const handleLogout = () => {
     logout();
     resetCart();
+    clearWishlist();
     router.push('/login');
   };
 
@@ -54,8 +59,15 @@ export const Navbar: React.FC = () => {
           </Link>
         </nav>
 
-        {/* User / Cart / Auth actions */}
+        {/* User / Cart / Wishlist / Auth actions */}
         <div className="navbar-actions">
+          <Link href="/wishlist" className="navbar-cart-btn navbar-wishlist-btn" aria-label="Yêu thích" title="Danh sách yêu thích">
+            <IconHeart size={18} />
+            {wishlistTotal > 0 && (
+              <span className="cart-badge wishlist-badge">{wishlistTotal}</span>
+            )}
+          </Link>
+
           <Link href="/cart" className="navbar-cart-btn" aria-label="Giỏ hàng" title="Giỏ hàng">
             <IconShoppingBag size={18} />
             {totalItems > 0 && (

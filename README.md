@@ -192,6 +192,28 @@ Tại thư mục `Code/frontend`:
 
 ---
 
+### 5.6. Khởi chạy toàn bộ hệ thống bằng Docker Compose (Khuyên dùng)
+Dự án đã được đóng gói container hóa toàn diện (Multi-stage build) cho cả Database, Backend và Frontend:
+1. Tạo file môi trường từ mẫu:
+   ```bash
+   cp .env.example .env
+   ```
+2. Khởi chạy trọn gói các dịch vụ:
+   ```bash
+   docker compose up --build
+   ```
+3. Truy cập hệ thống:
+   * **Giao diện Storefront & Admin**: `http://localhost:3000`
+   * **Backend REST API**: `http://localhost:8080/api`
+   * **Cơ sở dữ liệu MySQL**: `localhost:3306` (tự động nạp sẵn toàn bộ schema và dữ liệu mẫu qua `/docker-entrypoint-initdb.d/`)
+
+Để dừng toàn bộ dịch vụ:
+```bash
+docker compose down
+```
+
+---
+
 ## 📖 6. Tài Liệu Tham Chiếu & Quy Chuẩn
 
 * [MVP Specification](Docs/MVP_SPEC.md) — Đặc tả chi tiết các phân hệ và yêu cầu chức năng MVP.

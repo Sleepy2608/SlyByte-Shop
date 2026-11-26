@@ -175,6 +175,35 @@ CREATE TABLE payments (
 );
 
 -- ============================================================
+-- 12. PRODUCT_REVIEWS
+-- ============================================================
+CREATE TABLE product_reviews (
+    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id              BIGINT          NOT NULL,
+    user_id                 BIGINT          NOT NULL,
+    rating                  INT             NOT NULL,
+    comment                 TEXT,
+    is_verified_purchase    BOOLEAN         NOT NULL DEFAULT FALSE,
+    created_at              TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 13. WISHLIST_ITEMS
+-- ============================================================
+CREATE TABLE wishlist_items (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT          NOT NULL,
+    product_id      BIGINT          NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_user_product (user_id, product_id)
+);
+
+-- ============================================================
 -- INDEXES (Tối ưu truy vấn)
 -- ============================================================
 CREATE INDEX idx_products_category  ON products(category_id);
@@ -186,3 +215,7 @@ CREATE INDEX idx_orders_status      ON orders(order_status);
 CREATE INDEX idx_orders_code        ON orders(order_code);
 CREATE INDEX idx_cart_items_cart    ON cart_items(cart_id);
 CREATE INDEX idx_product_specs_prod ON product_specs(product_id);
+CREATE INDEX idx_reviews_product    ON product_reviews(product_id);
+CREATE INDEX idx_reviews_user       ON product_reviews(user_id);
+CREATE INDEX idx_wishlist_user      ON wishlist_items(user_id);
+CREATE INDEX idx_wishlist_product   ON wishlist_items(product_id);
