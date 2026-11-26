@@ -8,7 +8,6 @@ desktop.ini
 # ===============================
 # IDEs and Editors
 # ===============================
-.agents/
 .idea/
 *.iml
 .vscode/
@@ -17,7 +16,7 @@ desktop.ini
 *~
 
 # ===============================
-# Node / Frontend (React / Vite)
+# Node / Frontend (Next.js / React)
 # ===============================
 node_modules/
 dist/
@@ -35,6 +34,9 @@ pnpm-debug.log*
 .eslintcache
 .stylelintcache
 *.tsbuildinfo
+.next/
+out/
+next-env.d.ts
 
 # ===============================
 # Java / Backend (Maven / Gradle / Spring Boot)
@@ -66,15 +68,22 @@ logs/
 secrets.properties
 application-local.properties
 application-local.yml
-.plan
 
 # ===============================
 # Graphify Knowledge Graph
 # ===============================
-# Local environment paths, cache, and temporary/internal files
 graphify-out/
 
-# Next.js build output
-.next/
-out/
-next-env.d.ts
+# ===============================
+# AI Agents & Skills Configuration
+# ===============================
+.agents/
+.skills/
+skills/
+AGENTS.md
+*.skill-to-use.md
+
+# ===============================
+# Internal Planning
+# ===============================
+.plan/
