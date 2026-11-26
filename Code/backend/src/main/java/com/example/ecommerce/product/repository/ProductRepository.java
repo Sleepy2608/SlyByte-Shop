@@ -29,6 +29,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findTop8ByStatusOrderByCreatedAtDesc(ProductStatus status);
 
+    long countByStatus(ProductStatus status);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.status = :status AND p.stockQuantity <= 0")
+    long countByStatusAndOutOfStock(@Param("status") ProductStatus status);
+
     List<Product> findTop4ByCategoryIdAndIdNotAndStatus(Long categoryId, Long id, ProductStatus status);
 
     @Query("SELECT p FROM Product p WHERE p.status = :status " +
